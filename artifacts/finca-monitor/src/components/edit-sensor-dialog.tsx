@@ -47,7 +47,7 @@ export function EditSensorDialog({ open, onOpenChange, sensor }: { open: boolean
         onOpenChange(false);
       },
       onError: (err) => {
-        toast({ title: "Failed to update sensor", description: err.error?.error || "Unknown error", variant: "destructive" });
+        toast({ title: "Failed to update sensor", description: err.message || "Unknown error", variant: "destructive" });
       }
     }
   });

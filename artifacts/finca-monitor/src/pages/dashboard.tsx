@@ -1,4 +1,4 @@
-import { useGetSensorsSummary } from "@workspace/api-client-react";
+import { useGetSensorsSummary, getGetSensorsSummaryQueryKey } from "@workspace/api-client-react";
 import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { SensorCard } from "@/components/sensor-card";
@@ -8,7 +8,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 export default function Dashboard() {
   const { data: summaries, isLoading } = useGetSensorsSummary({
-    query: { refetchInterval: 30_000 },
+    query: { queryKey: getGetSensorsSummaryQueryKey(), refetchInterval: 30_000 },
   });
   const [isAddOpen, setIsAddOpen] = useState(false);
 

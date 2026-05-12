@@ -46,7 +46,7 @@ export function AddSensorDialog({ open, onOpenChange }: { open: boolean; onOpenC
         form.reset();
       },
       onError: (err) => {
-        toast({ title: "Failed to add sensor", description: err.error?.error || "Unknown error", variant: "destructive" });
+        toast({ title: "Failed to add sensor", description: err.message || "Unknown error", variant: "destructive" });
       }
     }
   });
