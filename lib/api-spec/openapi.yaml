@@ -155,7 +155,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
 
-  /sensors/{id}/readings/{range}:
+  /sensors/{id}/readings:
     get:
       operationId: getSensorReadings
       tags: [readings]
@@ -167,11 +167,12 @@ paths:
           schema:
             type: string
         - name: range
-          in: path
-          required: true
+          in: query
+          required: false
           schema:
             type: string
             enum: [24h, 7d]
+          description: Time range — 24h (default) or 7d
       responses:
         "200":
           description: List of readings

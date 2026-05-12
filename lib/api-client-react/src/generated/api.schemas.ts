@@ -64,3 +64,18 @@ export interface SensorSummary {
 export interface ErrorResponse {
   error: string;
 }
+
+export type GetSensorReadingsParams = {
+  /**
+   * Time range — 24h (default) or 7d
+   */
+  range?: GetSensorReadingsRange;
+};
+
+export type GetSensorReadingsRange =
+  (typeof GetSensorReadingsRange)[keyof typeof GetSensorReadingsRange];
+
+export const GetSensorReadingsRange = {
+  "24h": "24h",
+  "7d": "7d",
+} as const;

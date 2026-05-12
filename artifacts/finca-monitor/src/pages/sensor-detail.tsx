@@ -39,11 +39,11 @@ export default function SensorDetail() {
   const { toast } = useToast();
 
   const { data: sensor, isLoading: isLoadingSensor } = useGetSensor(id!, {
-    query: { enabled: !!id, queryKey: getGetSensorQueryKey(id!) }
+    query: { enabled: !!id, queryKey: getGetSensorQueryKey(id!), refetchInterval: 30_000 }
   });
 
-  const { data: readings, isLoading: isLoadingReadings } = useGetSensorReadings(id!, range, {
-    query: { enabled: !!id, queryKey: getGetSensorReadingsQueryKey(id!, range) }
+  const { data: readings, isLoading: isLoadingReadings } = useGetSensorReadings(id!, { range }, {
+    query: { enabled: !!id, queryKey: getGetSensorReadingsQueryKey(id!, { range }), refetchInterval: 30_000 }
   });
 
   const deleteMutation = useDeleteSensor({

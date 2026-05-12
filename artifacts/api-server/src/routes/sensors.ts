@@ -169,8 +169,8 @@ router.delete("/sensors/:id", async (req, res) => {
   res.status(204).send();
 });
 
-router.get("/sensors/:id/readings/:range", async (req, res) => {
-  const { range = "24h" } = req.params;
+router.get("/sensors/:id/readings", async (req, res) => {
+  const range = (req.query["range"] as string) || "24h";
 
   const [sensor] = await db
     .select()

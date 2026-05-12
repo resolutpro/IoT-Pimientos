@@ -121,7 +121,13 @@ export const DeleteSensorParams = zod.object({
  */
 export const GetSensorReadingsParams = zod.object({
   id: zod.coerce.string(),
-  range: zod.enum(["24h", "7d"]),
+});
+
+export const GetSensorReadingsQueryParams = zod.object({
+  range: zod
+    .enum(["24h", "7d"])
+    .optional()
+    .describe("Time range — 24h (default) or 7d"),
 });
 
 export const GetSensorReadingsResponseItem = zod.object({

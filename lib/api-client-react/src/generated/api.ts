@@ -18,6 +18,7 @@ import type {
 
 import type {
   ErrorResponse,
+  GetSensorReadingsParams,
   HealthStatus,
   Reading,
   Sensor,
@@ -604,16 +605,31 @@ export const useDeleteSensor = <
 /**
  * @summary Get readings for a sensor in a given time range
  */
-export const getGetSensorReadingsUrl = (id: string, range: "24h" | "7d") => {
-  return `/api/sensors/${id}/readings/${range}`;
+export const getGetSensorReadingsUrl = (
+  id: string,
+  params?: GetSensorReadingsParams,
+) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? "null" : value.toString());
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0
+    ? `/api/sensors/${id}/readings?${stringifiedParams}`
+    : `/api/sensors/${id}/readings`;
 };
 
 export const getSensorReadings = async (
   id: string,
-  range: "24h" | "7d",
+  params?: GetSensorReadingsParams,
   options?: RequestInit,
 ): Promise<Reading[]> => {
-  return customFetch<Reading[]>(getGetSensorReadingsUrl(id, range), {
+  return customFetch<Reading[]>(getGetSensorReadingsUrl(id, params), {
     ...options,
     method: "GET",
   });
@@ -621,9 +637,9 @@ export const getSensorReadings = async (
 
 export const getGetSensorReadingsQueryKey = (
   id: string,
-  range: "24h" | "7d",
+  params?: GetSensorReadingsParams,
 ) => {
-  return [`/api/sensors/${id}/readings/${range}`] as const;
+  return [`/api/sensors/${id}/readings`, ...(params ? [params] : [])] as const;
 };
 
 export const getGetSensorReadingsQueryOptions = <
@@ -631,7 +647,7 @@ export const getGetSensorReadingsQueryOptions = <
   TError = ErrorType<ErrorResponse>,
 >(
   id: string,
-  range: "24h" | "7d",
+  params?: GetSensorReadingsParams,
   options?: {
     query?: UseQueryOptions<
       Awaited<ReturnType<typeof getSensorReadings>>,
@@ -644,17 +660,17 @@ export const getGetSensorReadingsQueryOptions = <
   const { query: queryOptions, request: requestOptions } = options ?? {};
 
   const queryKey =
-    queryOptions?.queryKey ?? getGetSensorReadingsQueryKey(id, range);
+    queryOptions?.queryKey ?? getGetSensorReadingsQueryKey(id, params);
 
   const queryFn: QueryFunction<
     Awaited<ReturnType<typeof getSensorReadings>>
   > = ({ signal }) =>
-    getSensorReadings(id, range, { signal, ...requestOptions });
+    getSensorReadings(id, params, { signal, ...requestOptions });
 
   return {
     queryKey,
     queryFn,
-    enabled: !!(id && range),
+    enabled: !!id,
     ...queryOptions,
   } as UseQueryOptions<
     Awaited<ReturnType<typeof getSensorReadings>>,
@@ -677,7 +693,7 @@ export function useGetSensorReadings<
   TError = ErrorType<ErrorResponse>,
 >(
   id: string,
-  range: "24h" | "7d",
+  params?: GetSensorReadingsParams,
   options?: {
     query?: UseQueryOptions<
       Awaited<ReturnType<typeof getSensorReadings>>,
@@ -687,7 +703,7 @@ export function useGetSensorReadings<
     request?: SecondParameter<typeof customFetch>;
   },
 ): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
-  const queryOptions = getGetSensorReadingsQueryOptions(id, range, options);
+  const queryOptions = getGetSensorReadingsQueryOptions(id, params, options);
 
   const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
     queryKey: QueryKey;

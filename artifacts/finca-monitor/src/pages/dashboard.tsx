@@ -7,7 +7,9 @@ import { useState } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 
 export default function Dashboard() {
-  const { data: summaries, isLoading } = useGetSensorsSummary();
+  const { data: summaries, isLoading } = useGetSensorsSummary({
+    query: { refetchInterval: 30_000 },
+  });
   const [isAddOpen, setIsAddOpen] = useState(false);
 
   return (

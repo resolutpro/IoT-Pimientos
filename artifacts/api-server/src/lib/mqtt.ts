@@ -87,9 +87,7 @@ export function startMqttClient(): void {
     return;
   }
 
-  const options: mqtt.IClientOptions = {
-    rejectUnauthorized: false,
-  };
+  const options: mqtt.IClientOptions = {};
 
   const username = process.env["MQTT_USERNAME"];
   const password = process.env["MQTT_PASSWORD"];
