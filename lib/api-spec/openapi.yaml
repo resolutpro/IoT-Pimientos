@@ -10,6 +10,10 @@ servers:
 tags:
   - name: health
     description: Health operations
+  - name: sensors
+    description: Sensor management
+  - name: readings
+    description: Sensor readings
 paths:
   /healthz:
     get:
@@ -24,6 +28,166 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+
+  /sensors:
+    get:
+      operationId: listSensors
+      tags: [sensors]
+      summary: List all sensors
+      responses:
+        "200":
+          description: List of sensors
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Sensor"
+    post:
+      operationId: createSensor
+      tags: [sensors]
+      summary: Create a new sensor
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SensorInput"
+      responses:
+        "201":
+          description: Created sensor
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Sensor"
+        "409":
+          description: Sensor ID already exists
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /sensors/summary:
+    get:
+      operationId: getSensorsSummary
+      tags: [sensors]
+      summary: Get all sensors with latest reading and computed status
+      responses:
+        "200":
+          description: Sensor summary list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/SensorSummary"
+
+  /sensors/{id}:
+    get:
+      operationId: getSensor
+      tags: [sensors]
+      summary: Get a single sensor
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Sensor
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Sensor"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+    put:
+      operationId: updateSensor
+      tags: [sensors]
+      summary: Update a sensor
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SensorUpdate"
+      responses:
+        "200":
+          description: Updated sensor
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Sensor"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+    delete:
+      operationId: deleteSensor
+      tags: [sensors]
+      summary: Delete a sensor
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: Deleted
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /sensors/{id}/readings/{range}:
+    get:
+      operationId: getSensorReadings
+      tags: [readings]
+      summary: Get readings for a sensor in a given time range
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: range
+          in: path
+          required: true
+          schema:
+            type: string
+            enum: [24h, 7d]
+      responses:
+        "200":
+          description: List of readings
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Reading"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
 components:
   schemas:
     HealthStatus:
@@ -34,3 +198,116 @@ components:
       required:
         - status
 
+    Sensor:
+      type: object
+      properties:
+        id_sensor:
+          type: string
+        nombre_zona:
+          type: string
+        umbral_humedad_min:
+          type: number
+        umbral_humedad_max:
+          type: number
+        umbral_ec_max:
+          type: number
+        created_at:
+          type: string
+          format: date-time
+      required:
+        - id_sensor
+        - nombre_zona
+        - umbral_humedad_min
+        - umbral_humedad_max
+        - umbral_ec_max
+        - created_at
+
+    SensorInput:
+      type: object
+      properties:
+        id_sensor:
+          type: string
+        nombre_zona:
+          type: string
+        umbral_humedad_min:
+          type: number
+        umbral_humedad_max:
+          type: number
+        umbral_ec_max:
+          type: number
+      required:
+        - id_sensor
+        - nombre_zona
+        - umbral_humedad_min
+        - umbral_humedad_max
+        - umbral_ec_max
+
+    SensorUpdate:
+      type: object
+      properties:
+        nombre_zona:
+          type: string
+        umbral_humedad_min:
+          type: number
+        umbral_humedad_max:
+          type: number
+        umbral_ec_max:
+          type: number
+
+    Reading:
+      type: object
+      properties:
+        id:
+          type: integer
+        sensor_id:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+        humedad:
+          type: number
+          nullable: true
+        temperatura:
+          type: number
+          nullable: true
+        ec:
+          type: number
+          nullable: true
+        bateria:
+          type: number
+          nullable: true
+        senal:
+          type: number
+          nullable: true
+      required:
+        - id
+        - sensor_id
+        - timestamp
+
+    SensorSummary:
+      type: object
+      properties:
+        sensor:
+          $ref: "#/components/schemas/Sensor"
+        latestReading:
+          $ref: "#/components/schemas/Reading"
+          nullable: true
+        status:
+          type: string
+          enum: [ok, warning, critical, unknown]
+        alerts:
+          type: array
+          items:
+            type: string
+      required:
+        - sensor
+        - status
+        - alerts
+
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+      required:
+        - error

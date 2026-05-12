@@ -14,3 +14,126 @@ import * as zod from "zod";
 export const HealthCheckResponse = zod.object({
   status: zod.string(),
 });
+
+/**
+ * @summary List all sensors
+ */
+export const ListSensorsResponseItem = zod.object({
+  id_sensor: zod.string(),
+  nombre_zona: zod.string(),
+  umbral_humedad_min: zod.number(),
+  umbral_humedad_max: zod.number(),
+  umbral_ec_max: zod.number(),
+  created_at: zod.coerce.date(),
+});
+export const ListSensorsResponse = zod.array(ListSensorsResponseItem);
+
+/**
+ * @summary Create a new sensor
+ */
+export const CreateSensorBody = zod.object({
+  id_sensor: zod.string(),
+  nombre_zona: zod.string(),
+  umbral_humedad_min: zod.number(),
+  umbral_humedad_max: zod.number(),
+  umbral_ec_max: zod.number(),
+});
+
+/**
+ * @summary Get all sensors with latest reading and computed status
+ */
+export const GetSensorsSummaryResponseItem = zod.object({
+  sensor: zod.object({
+    id_sensor: zod.string(),
+    nombre_zona: zod.string(),
+    umbral_humedad_min: zod.number(),
+    umbral_humedad_max: zod.number(),
+    umbral_ec_max: zod.number(),
+    created_at: zod.coerce.date(),
+  }),
+  latestReading: zod
+    .object({
+      id: zod.number(),
+      sensor_id: zod.string(),
+      timestamp: zod.coerce.date(),
+      humedad: zod.number().nullish(),
+      temperatura: zod.number().nullish(),
+      ec: zod.number().nullish(),
+      bateria: zod.number().nullish(),
+      senal: zod.number().nullish(),
+    })
+    .nullish(),
+  status: zod.enum(["ok", "warning", "critical", "unknown"]),
+  alerts: zod.array(zod.string()),
+});
+export const GetSensorsSummaryResponse = zod.array(
+  GetSensorsSummaryResponseItem,
+);
+
+/**
+ * @summary Get a single sensor
+ */
+export const GetSensorParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+export const GetSensorResponse = zod.object({
+  id_sensor: zod.string(),
+  nombre_zona: zod.string(),
+  umbral_humedad_min: zod.number(),
+  umbral_humedad_max: zod.number(),
+  umbral_ec_max: zod.number(),
+  created_at: zod.coerce.date(),
+});
+
+/**
+ * @summary Update a sensor
+ */
+export const UpdateSensorParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+export const UpdateSensorBody = zod.object({
+  nombre_zona: zod.string().optional(),
+  umbral_humedad_min: zod.number().optional(),
+  umbral_humedad_max: zod.number().optional(),
+  umbral_ec_max: zod.number().optional(),
+});
+
+export const UpdateSensorResponse = zod.object({
+  id_sensor: zod.string(),
+  nombre_zona: zod.string(),
+  umbral_humedad_min: zod.number(),
+  umbral_humedad_max: zod.number(),
+  umbral_ec_max: zod.number(),
+  created_at: zod.coerce.date(),
+});
+
+/**
+ * @summary Delete a sensor
+ */
+export const DeleteSensorParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary Get readings for a sensor in a given time range
+ */
+export const GetSensorReadingsParams = zod.object({
+  id: zod.coerce.string(),
+  range: zod.enum(["24h", "7d"]),
+});
+
+export const GetSensorReadingsResponseItem = zod.object({
+  id: zod.number(),
+  sensor_id: zod.string(),
+  timestamp: zod.coerce.date(),
+  humedad: zod.number().nullish(),
+  temperatura: zod.number().nullish(),
+  ec: zod.number().nullish(),
+  bateria: zod.number().nullish(),
+  senal: zod.number().nullish(),
+});
+export const GetSensorReadingsResponse = zod.array(
+  GetSensorReadingsResponseItem,
+);

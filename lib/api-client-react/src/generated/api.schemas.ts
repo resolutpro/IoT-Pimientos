@@ -8,3 +8,59 @@
 export interface HealthStatus {
   status: string;
 }
+
+export interface Sensor {
+  id_sensor: string;
+  nombre_zona: string;
+  umbral_humedad_min: number;
+  umbral_humedad_max: number;
+  umbral_ec_max: number;
+  created_at: string;
+}
+
+export interface SensorInput {
+  id_sensor: string;
+  nombre_zona: string;
+  umbral_humedad_min: number;
+  umbral_humedad_max: number;
+  umbral_ec_max: number;
+}
+
+export interface SensorUpdate {
+  nombre_zona?: string;
+  umbral_humedad_min?: number;
+  umbral_humedad_max?: number;
+  umbral_ec_max?: number;
+}
+
+export interface Reading {
+  id: number;
+  sensor_id: string;
+  timestamp: string;
+  humedad?: number | null;
+  temperatura?: number | null;
+  ec?: number | null;
+  bateria?: number | null;
+  senal?: number | null;
+}
+
+export type SensorSummaryStatus =
+  (typeof SensorSummaryStatus)[keyof typeof SensorSummaryStatus];
+
+export const SensorSummaryStatus = {
+  ok: "ok",
+  warning: "warning",
+  critical: "critical",
+  unknown: "unknown",
+} as const;
+
+export interface SensorSummary {
+  sensor: Sensor;
+  latestReading?: Reading | null;
+  status: SensorSummaryStatus;
+  alerts: string[];
+}
+
+export interface ErrorResponse {
+  error: string;
+}

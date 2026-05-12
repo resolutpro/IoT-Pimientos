@@ -6,4 +6,11 @@
  * OpenAPI spec version: 0.1.0
  */
 
+export * from "./errorResponse";
 export * from "./healthStatus";
+export * from "./reading";
+export * from "./sensor";
+export * from "./sensorInput";
+export * from "./sensorSummary";
+export * from "./sensorSummaryStatus";
+export * from "./sensorUpdate";
