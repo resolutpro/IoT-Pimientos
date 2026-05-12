@@ -1,0 +1,47 @@
+Actúa como un desarrollador Full-Stack experto en IoT y Node.js. Quiero crear una aplicación web para monitorizar y gestionar una plantación de pimientos utilizando sensores Dragino SE01-NB conectados vía MQTT.
+
+1. Arquitectura y Stack Tecnológico:
+
+Backend: Node.js con Express.
+
+Protocolo IoT: Librería mqtt para conectarse a un broker externo (ej. HiveMQ) mediante MQTTs (puerto 8883) y suscribirse al topic finca/+/datos (donde + será el ID de cada sensor).
+
+Base de datos: SQLite (o la base de datos nativa de Replit) usando un ORM como Prisma o Sequelize.
+
+Frontend: HTML, CSS, JavaScript puro (o React si lo prefieres) usando Tailwind CSS para un diseño limpio y Chart.js para los gráficos.
+
+Alertas: Integración con la API de Telegram (librería telegraf o node-telegram-bot-api) para enviar mensajes automáticos.
+
+2. Base de Datos (Escalabilidad):
+Necesito dos tablas principales:
+
+Sensors: id_sensor (string único), nombre_zona (ej. "Sector Norte"), umbral_humedad_min, umbral_humedad_max, umbral_ec_max. (Esto permite añadir sensores fácilmente y que cada zona tenga sus propias reglas).
+
+Readings: id, sensor_id (foreign key), timestamp, humedad, temperatura, ec, bateria, senal.
+
+3. Backend y Lógica de Alertas (Pimientos):
+Cuando el backend reciba un mensaje MQTT, debe:
+
+Guardar los datos en la tabla Readings.
+
+Comparar los datos con los umbrales del sensor en la tabla Sensors.
+
+Enviar un mensaje de Telegram a mi chat_id si se cumplen estas condiciones críticas para el pimiento:
+
+Estrés hídrico: Humedad < umbral_min (Riesgo de caída de flor y podredumbre apical).
+
+Asfixia radicular: Humedad > umbral_max (Riesgo de hongos).
+
+Estrés salino: EC > umbral_ec_max (Riesgo de intoxicación por sales).
+
+Batería baja: Batería < 20%.
+
+4. Frontend (Visual y Útil):
+
+Dashboard principal: Tarjetas (Cards) para cada sensor mostrando el último dato recibido. Deben cambiar de color (verde, amarillo, rojo) según el estado de la zona.
+
+Gráficos: Al hacer clic en un sensor, mostrar un gráfico de líneas (Chart.js) con la evolución de humedad y temperatura de las últimas 24 horas/7 días.
+
+Gestión: Un formulario sencillo en la web para "Añadir nuevo sensor" (donde meto su ID de MQTT, nombre y umbrales) sin tener que tocar código.
+
+Por favor, genera la estructura del proyecto, el código de inicialización del backend con la conexión MQTT, el modelo de base de datos y un frontend básico funcional. Dime qué variables de entorno (como el Token de Telegram o las credenciales MQTT) necesito configurar.
