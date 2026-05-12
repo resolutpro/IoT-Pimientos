@@ -1,3 +1,4 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,300..900;1,14..32,300..900&display=swap');
 @import "tailwindcss";
 @import "tw-animate-css";
 @plugin "@tailwindcss/typography";
@@ -75,49 +76,49 @@
   --elevate-1: rgba(0,0,0, .03);
   --elevate-2: rgba(0,0,0, .08);
 
-  --background: 72 20% 95%; /* #f4f5f0 */
-  --foreground: 104 7% 18%; /* #2b302a */
-  --border: 75 14% 88%; /* #e2e4dd */
+  --background: 80 18% 96%; /* off-white with faint green tint */
+  --foreground: 150 15% 8%; /* near-black for outdoor contrast */
+  --border: 80 12% 84%;
   --card: 0 0% 100%;
-  --card-foreground: 104 7% 18%;
-  --card-border: 75 14% 88%;
-  
-  --sidebar: 72 20% 95%;
-  --sidebar-foreground: 104 7% 18%;
-  --sidebar-border: 75 14% 88%;
-  --sidebar-primary: 104 24% 34%;
+  --card-foreground: 150 15% 8%;
+  --card-border: 80 12% 84%;
+
+  --sidebar: 80 18% 96%;
+  --sidebar-foreground: 150 15% 8%;
+  --sidebar-border: 80 12% 84%;
+  --sidebar-primary: 161 84% 30%; /* emerald-600 */
   --sidebar-primary-foreground: 0 0% 100%;
-  --sidebar-accent: 75 14% 88%;
-  --sidebar-accent-foreground: 104 7% 18%;
-  --sidebar-ring: 104 24% 34%;
-  
+  --sidebar-accent: 80 12% 84%;
+  --sidebar-accent-foreground: 150 15% 8%;
+  --sidebar-ring: 161 84% 30%;
+
   --popover: 0 0% 100%;
-  --popover-foreground: 104 7% 18%;
-  --popover-border: 75 14% 88%;
-  
-  --primary: 104 24% 34%; /* #4a6b41 */
+  --popover-foreground: 150 15% 8%;
+  --popover-border: 80 12% 84%;
+
+  --primary: 161 84% 30%; /* emerald-600 #059669 */
   --primary-foreground: 0 0% 100%;
-  
-  --secondary: 19 61% 58%; /* #d27d56 */
+
+  --secondary: 142 71% 38%; /* green-600 */
   --secondary-foreground: 0 0% 100%;
-  
-  --muted: 75 14% 92%;
-  --muted-foreground: 104 7% 40%;
-  
-  --accent: 75 14% 90%;
-  --accent-foreground: 104 7% 18%;
-  
+
+  --muted: 80 14% 91%;
+  --muted-foreground: 150 10% 28%; /* darker for outdoor readability */
+
+  --accent: 80 14% 88%;
+  --accent-foreground: 150 15% 8%;
+
   --destructive: 0 74% 42%;
   --destructive-foreground: 0 0% 100%;
-  
-  --input: 75 14% 80%;
-  --ring: 104 24% 34%;
-  
-  --chart-1: 104 24% 34%;
-  --chart-2: 19 61% 58%;
+
+  --input: 80 12% 78%;
+  --ring: 161 84% 30%;
+
+  --chart-1: 161 84% 30%; /* emerald-600 for humidity */
+  --chart-2: 27 96% 54%; /* orange-500 for temperature */
   --chart-3: 45 93% 47%;
   --chart-4: 175 40% 40%;
-  --chart-5: 27 87% 67%;
+  --chart-5: 270 70% 55%;
 
   --app-font-sans: 'Inter', sans-serif;
   --app-font-serif: Georgia, serif;
