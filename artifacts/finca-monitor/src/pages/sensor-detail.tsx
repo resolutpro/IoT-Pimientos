@@ -4,39 +4,19 @@ import {
   getGetSensorQueryKey,
   useGetSensorReadings,
   getGetSensorReadingsQueryKey,
-  useDeleteSensor,
-  getGetSensorsSummaryQueryKey
 } from "@workspace/api-client-react";
 import { useState } from "react";
-import { ChevronLeft, Edit2, Trash2, Battery, Wifi, Droplets, Thermometer, Activity } from "lucide-react";
+import { ChevronLeft, Battery, Wifi, Droplets, Thermometer, Activity } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { EditSensorDialog } from "@/components/edit-sensor-dialog";
-import { 
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
 import { format, parseISO } from "date-fns";
-import { useQueryClient } from "@tanstack/react-query";
-import { useToast } from "@/hooks/use-toast";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, Legend } from "recharts";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 
 export default function SensorDetail() {
   const { id } = useParams<{ id: string }>();
   const [range, setRange] = useState<"24h" | "7d">("24h");
-  const [isEditOpen, setIsEditOpen] = useState(false);
-  const [isDeleteOpen, setIsDeleteOpen] = useState(false);
-  const queryClient = useQueryClient();
-  const [, setLocation] = useLocation();
-  const { toast } = useToast();
 
   const { data: sensor, isLoading: isLoadingSensor } = useGetSensor(id!, {
     query: { enabled: !!id, queryKey: getGetSensorQueryKey(id!), refetchInterval: 30_000 }
@@ -44,19 +24,6 @@ export default function SensorDetail() {
 
   const { data: readings, isLoading: isLoadingReadings } = useGetSensorReadings(id!, { range }, {
     query: { enabled: !!id, queryKey: getGetSensorReadingsQueryKey(id!, { range }), refetchInterval: 30_000 }
-  });
-
-  const deleteMutation = useDeleteSensor({
-    mutation: {
-      onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: getGetSensorsSummaryQueryKey() });
-        toast({ title: "Sensor deleted", description: "The sensor has been removed from the system." });
-        setLocation("/");
-      },
-      onError: () => {
-        toast({ title: "Error", description: "Failed to delete sensor.", variant: "destructive" });
-      }
-    }
   });
 
   const latestReading = readings && readings.length > 0 ? readings[readings.length - 1] : null;
@@ -104,15 +71,7 @@ export default function SensorDetail() {
         </Button>
         <div className="flex-1 min-w-0">
           <h1 className="text-xl font-bold leading-tight">{sensor.nombre_zona}</h1>
-          <p className="text-xs text-muted-foreground font-mono mt-0.5 truncate">ID: {sensor.id_sensor}</p>
-        </div>
-        <div className="flex items-center gap-2 shrink-0">
-          <Button variant="outline" size="icon" className="h-11 w-11" onClick={() => setIsEditOpen(true)} data-testid="button-edit-sensor">
-            <Edit2 className="h-4 w-4" />
-          </Button>
-          <Button variant="destructive" size="icon" className="h-11 w-11" onClick={() => setIsDeleteOpen(true)} data-testid="button-delete-sensor">
-            <Trash2 className="h-4 w-4" />
-          </Button>
+          <p className="text-xs text-muted-foreground font-mono mt-0.5 truncate">ID: {sensor.id_sensor} • Tipo: {sensor.tipo}</p>
         </div>
       </div>
 
@@ -200,27 +159,6 @@ export default function SensorDetail() {
         </CardContent>
       </Card>
 
-      <EditSensorDialog open={isEditOpen} onOpenChange={setIsEditOpen} sensor={sensor} />
-
-      <AlertDialog open={isDeleteOpen} onOpenChange={setIsDeleteOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Delete Sensor?</AlertDialogTitle>
-            <AlertDialogDescription>
-              This will permanently delete the sensor "{sensor.nombre_zona}" and all its historical readings. This action cannot be undone.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction 
-              onClick={() => deleteMutation.mutate({ id: sensor.id_sensor })}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-            >
-              {deleteMutation.isPending ? "Deleting..." : "Delete Sensor"}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
     </div>
   );
 }

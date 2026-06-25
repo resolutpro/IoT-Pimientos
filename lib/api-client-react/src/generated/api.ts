@@ -5,13 +5,10 @@
  * API specification
  * OpenAPI spec version: 0.1.0
  */
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import type {
-  MutationFunction,
   QueryFunction,
   QueryKey,
-  UseMutationOptions,
-  UseMutationResult,
   UseQueryOptions,
   UseQueryResult,
 } from "@tanstack/react-query";
@@ -22,13 +19,11 @@ import type {
   HealthStatus,
   Reading,
   Sensor,
-  SensorInput,
   SensorSummary,
-  SensorUpdate,
 } from "./api.schemas";
 
 import { customFetch } from "../custom-fetch";
-import type { ErrorType, BodyType } from "../custom-fetch";
+import type { ErrorType } from "../custom-fetch";
 
 type AwaitedInput<T> = PromiseLike<T> | T;
 
@@ -184,92 +179,6 @@ export function useListSensors<
 
   return { ...query, queryKey: queryOptions.queryKey };
 }
-
-/**
- * @summary Create a new sensor
- */
-export const getCreateSensorUrl = () => {
-  return `/api/sensors`;
-};
-
-export const createSensor = async (
-  sensorInput: SensorInput,
-  options?: RequestInit,
-): Promise<Sensor> => {
-  return customFetch<Sensor>(getCreateSensorUrl(), {
-    ...options,
-    method: "POST",
-    headers: { "Content-Type": "application/json", ...options?.headers },
-    body: JSON.stringify(sensorInput),
-  });
-};
-
-export const getCreateSensorMutationOptions = <
-  TError = ErrorType<ErrorResponse>,
-  TContext = unknown,
->(options?: {
-  mutation?: UseMutationOptions<
-    Awaited<ReturnType<typeof createSensor>>,
-    TError,
-    { data: BodyType<SensorInput> },
-    TContext
-  >;
-  request?: SecondParameter<typeof customFetch>;
-}): UseMutationOptions<
-  Awaited<ReturnType<typeof createSensor>>,
-  TError,
-  { data: BodyType<SensorInput> },
-  TContext
-> => {
-  const mutationKey = ["createSensor"];
-  const { mutation: mutationOptions, request: requestOptions } = options
-    ? options.mutation &&
-      "mutationKey" in options.mutation &&
-      options.mutation.mutationKey
-      ? options
-      : { ...options, mutation: { ...options.mutation, mutationKey } }
-    : { mutation: { mutationKey }, request: undefined };
-
-  const mutationFn: MutationFunction<
-    Awaited<ReturnType<typeof createSensor>>,
-    { data: BodyType<SensorInput> }
-  > = (props) => {
-    const { data } = props ?? {};
-
-    return createSensor(data, requestOptions);
-  };
-
-  return { mutationFn, ...mutationOptions };
-};
-
-export type CreateSensorMutationResult = NonNullable<
-  Awaited<ReturnType<typeof createSensor>>
->;
-export type CreateSensorMutationBody = BodyType<SensorInput>;
-export type CreateSensorMutationError = ErrorType<ErrorResponse>;
-
-/**
- * @summary Create a new sensor
- */
-export const useCreateSensor = <
-  TError = ErrorType<ErrorResponse>,
-  TContext = unknown,
->(options?: {
-  mutation?: UseMutationOptions<
-    Awaited<ReturnType<typeof createSensor>>,
-    TError,
-    { data: BodyType<SensorInput> },
-    TContext
-  >;
-  request?: SecondParameter<typeof customFetch>;
-}): UseMutationResult<
-  Awaited<ReturnType<typeof createSensor>>,
-  TError,
-  { data: BodyType<SensorInput> },
-  TContext
-> => {
-  return useMutation(getCreateSensorMutationOptions(options));
-};
 
 /**
  * @summary Get all sensors with latest reading and computed status
@@ -430,177 +339,6 @@ export function useGetSensor<
 
   return { ...query, queryKey: queryOptions.queryKey };
 }
-
-/**
- * @summary Update a sensor
- */
-export const getUpdateSensorUrl = (id: string) => {
-  return `/api/sensors/${id}`;
-};
-
-export const updateSensor = async (
-  id: string,
-  sensorUpdate: SensorUpdate,
-  options?: RequestInit,
-): Promise<Sensor> => {
-  return customFetch<Sensor>(getUpdateSensorUrl(id), {
-    ...options,
-    method: "PUT",
-    headers: { "Content-Type": "application/json", ...options?.headers },
-    body: JSON.stringify(sensorUpdate),
-  });
-};
-
-export const getUpdateSensorMutationOptions = <
-  TError = ErrorType<ErrorResponse>,
-  TContext = unknown,
->(options?: {
-  mutation?: UseMutationOptions<
-    Awaited<ReturnType<typeof updateSensor>>,
-    TError,
-    { id: string; data: BodyType<SensorUpdate> },
-    TContext
-  >;
-  request?: SecondParameter<typeof customFetch>;
-}): UseMutationOptions<
-  Awaited<ReturnType<typeof updateSensor>>,
-  TError,
-  { id: string; data: BodyType<SensorUpdate> },
-  TContext
-> => {
-  const mutationKey = ["updateSensor"];
-  const { mutation: mutationOptions, request: requestOptions } = options
-    ? options.mutation &&
-      "mutationKey" in options.mutation &&
-      options.mutation.mutationKey
-      ? options
-      : { ...options, mutation: { ...options.mutation, mutationKey } }
-    : { mutation: { mutationKey }, request: undefined };
-
-  const mutationFn: MutationFunction<
-    Awaited<ReturnType<typeof updateSensor>>,
-    { id: string; data: BodyType<SensorUpdate> }
-  > = (props) => {
-    const { id, data } = props ?? {};
-
-    return updateSensor(id, data, requestOptions);
-  };
-
-  return { mutationFn, ...mutationOptions };
-};
-
-export type UpdateSensorMutationResult = NonNullable<
-  Awaited<ReturnType<typeof updateSensor>>
->;
-export type UpdateSensorMutationBody = BodyType<SensorUpdate>;
-export type UpdateSensorMutationError = ErrorType<ErrorResponse>;
-
-/**
- * @summary Update a sensor
- */
-export const useUpdateSensor = <
-  TError = ErrorType<ErrorResponse>,
-  TContext = unknown,
->(options?: {
-  mutation?: UseMutationOptions<
-    Awaited<ReturnType<typeof updateSensor>>,
-    TError,
-    { id: string; data: BodyType<SensorUpdate> },
-    TContext
-  >;
-  request?: SecondParameter<typeof customFetch>;
-}): UseMutationResult<
-  Awaited<ReturnType<typeof updateSensor>>,
-  TError,
-  { id: string; data: BodyType<SensorUpdate> },
-  TContext
-> => {
-  return useMutation(getUpdateSensorMutationOptions(options));
-};
-
-/**
- * @summary Delete a sensor
- */
-export const getDeleteSensorUrl = (id: string) => {
-  return `/api/sensors/${id}`;
-};
-
-export const deleteSensor = async (
-  id: string,
-  options?: RequestInit,
-): Promise<void> => {
-  return customFetch<void>(getDeleteSensorUrl(id), {
-    ...options,
-    method: "DELETE",
-  });
-};
-
-export const getDeleteSensorMutationOptions = <
-  TError = ErrorType<ErrorResponse>,
-  TContext = unknown,
->(options?: {
-  mutation?: UseMutationOptions<
-    Awaited<ReturnType<typeof deleteSensor>>,
-    TError,
-    { id: string },
-    TContext
-  >;
-  request?: SecondParameter<typeof customFetch>;
-}): UseMutationOptions<
-  Awaited<ReturnType<typeof deleteSensor>>,
-  TError,
-  { id: string },
-  TContext
-> => {
-  const mutationKey = ["deleteSensor"];
-  const { mutation: mutationOptions, request: requestOptions } = options
-    ? options.mutation &&
-      "mutationKey" in options.mutation &&
-      options.mutation.mutationKey
-      ? options
-      : { ...options, mutation: { ...options.mutation, mutationKey } }
-    : { mutation: { mutationKey }, request: undefined };
-
-  const mutationFn: MutationFunction<
-    Awaited<ReturnType<typeof deleteSensor>>,
-    { id: string }
-  > = (props) => {
-    const { id } = props ?? {};
-
-    return deleteSensor(id, requestOptions);
-  };
-
-  return { mutationFn, ...mutationOptions };
-};
-
-export type DeleteSensorMutationResult = NonNullable<
-  Awaited<ReturnType<typeof deleteSensor>>
->;
-
-export type DeleteSensorMutationError = ErrorType<ErrorResponse>;
-
-/**
- * @summary Delete a sensor
- */
-export const useDeleteSensor = <
-  TError = ErrorType<ErrorResponse>,
-  TContext = unknown,
->(options?: {
-  mutation?: UseMutationOptions<
-    Awaited<ReturnType<typeof deleteSensor>>,
-    TError,
-    { id: string },
-    TContext
-  >;
-  request?: SecondParameter<typeof customFetch>;
-}): UseMutationResult<
-  Awaited<ReturnType<typeof deleteSensor>>,
-  TError,
-  { id: string },
-  TContext
-> => {
-  return useMutation(getDeleteSensorMutationOptions(options));
-};
 
 /**
  * @summary Get readings for a sensor in a given time range

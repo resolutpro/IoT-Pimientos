@@ -12,6 +12,7 @@ export interface HealthStatus {
 export interface Sensor {
   id_sensor: string;
   nombre_zona: string;
+  tipo: string;
   umbral_humedad_min: number;
   umbral_humedad_max: number;
   umbral_ec_max: number;

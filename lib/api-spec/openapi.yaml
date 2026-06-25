@@ -43,29 +43,6 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/Sensor"
-    post:
-      operationId: createSensor
-      tags: [sensors]
-      summary: Create a new sensor
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/SensorInput"
-      responses:
-        "201":
-          description: Created sensor
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Sensor"
-        "409":
-          description: Sensor ID already exists
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorResponse"
 
   /sensors/summary:
     get:
@@ -100,54 +77,6 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Sensor"
-        "404":
-          description: Not found
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorResponse"
-    put:
-      operationId: updateSensor
-      tags: [sensors]
-      summary: Update a sensor
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: string
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/SensorUpdate"
-      responses:
-        "200":
-          description: Updated sensor
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Sensor"
-        "404":
-          description: Not found
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorResponse"
-    delete:
-      operationId: deleteSensor
-      tags: [sensors]
-      summary: Delete a sensor
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: string
-      responses:
-        "204":
-          description: Deleted
         "404":
           description: Not found
           content:
@@ -206,6 +135,8 @@ components:
           type: string
         nombre_zona:
           type: string
+        tipo:
+          type: string
         umbral_humedad_min:
           type: number
         umbral_humedad_max:
@@ -218,6 +149,7 @@ components:
       required:
         - id_sensor
         - nombre_zona
+        - tipo
         - umbral_humedad_min
         - umbral_humedad_max
         - umbral_ec_max

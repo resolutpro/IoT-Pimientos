@@ -21,6 +21,7 @@ export const HealthCheckResponse = zod.object({
 export const ListSensorsResponseItem = zod.object({
   id_sensor: zod.string(),
   nombre_zona: zod.string(),
+  tipo: zod.string(),
   umbral_humedad_min: zod.number(),
   umbral_humedad_max: zod.number(),
   umbral_ec_max: zod.number(),
@@ -29,23 +30,13 @@ export const ListSensorsResponseItem = zod.object({
 export const ListSensorsResponse = zod.array(ListSensorsResponseItem);
 
 /**
- * @summary Create a new sensor
- */
-export const CreateSensorBody = zod.object({
-  id_sensor: zod.string(),
-  nombre_zona: zod.string(),
-  umbral_humedad_min: zod.number(),
-  umbral_humedad_max: zod.number(),
-  umbral_ec_max: zod.number(),
-});
-
-/**
  * @summary Get all sensors with latest reading and computed status
  */
 export const GetSensorsSummaryResponseItem = zod.object({
   sensor: zod.object({
     id_sensor: zod.string(),
     nombre_zona: zod.string(),
+    tipo: zod.string(),
     umbral_humedad_min: zod.number(),
     umbral_humedad_max: zod.number(),
     umbral_ec_max: zod.number(),
@@ -80,40 +71,11 @@ export const GetSensorParams = zod.object({
 export const GetSensorResponse = zod.object({
   id_sensor: zod.string(),
   nombre_zona: zod.string(),
+  tipo: zod.string(),
   umbral_humedad_min: zod.number(),
   umbral_humedad_max: zod.number(),
   umbral_ec_max: zod.number(),
   created_at: zod.coerce.date(),
-});
-
-/**
- * @summary Update a sensor
- */
-export const UpdateSensorParams = zod.object({
-  id: zod.coerce.string(),
-});
-
-export const UpdateSensorBody = zod.object({
-  nombre_zona: zod.string().optional(),
-  umbral_humedad_min: zod.number().optional(),
-  umbral_humedad_max: zod.number().optional(),
-  umbral_ec_max: zod.number().optional(),
-});
-
-export const UpdateSensorResponse = zod.object({
-  id_sensor: zod.string(),
-  nombre_zona: zod.string(),
-  umbral_humedad_min: zod.number(),
-  umbral_humedad_max: zod.number(),
-  umbral_ec_max: zod.number(),
-  created_at: zod.coerce.date(),
-});
-
-/**
- * @summary Delete a sensor
- */
-export const DeleteSensorParams = zod.object({
-  id: zod.coerce.string(),
 });
 
 /**

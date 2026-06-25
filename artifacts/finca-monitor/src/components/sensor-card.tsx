@@ -72,60 +72,102 @@ export function SensorCard({ summary }: SensorCardProps) {
 
         <CardContent className="p-4 pt-2">
           {latestReading ? (
-            <div className="space-y-3">
-              <div className="grid grid-cols-3 gap-2">
-                <div className="flex flex-col bg-muted/40 rounded-lg p-2.5">
-                  <span className="text-[10px] uppercase text-muted-foreground font-semibold tracking-wider flex items-center gap-1 mb-1">
-                    <Droplets className="w-3 h-3 text-sky-500" /> Hum.
-                  </span>
-                  <span className="font-bold text-xl leading-none text-foreground">
-                    {latestReading.humedad != null ? `${latestReading.humedad}` : '--'}
-                    <span className="text-xs font-normal text-muted-foreground ml-0.5">%</span>
-                  </span>
+            sensor.tipo === "riego" ? (
+              <div className="flex flex-col gap-4">
+                <div className={cn(
+                  "flex flex-col items-center justify-center p-6 rounded-xl border-2 transition-colors shadow-inner",
+                  latestReading.humedad! < sensor.umbral_humedad_min
+                    ? "bg-red-50 border-red-300 text-red-900"
+                    : "bg-sky-50 border-sky-300 text-sky-900"
+                )}>
+                  <div className="flex items-center gap-2 mb-2">
+                    <Droplets className={cn(
+                      "w-8 h-8",
+                      latestReading.humedad! < sensor.umbral_humedad_min ? "text-red-500" : "text-sky-500"
+                    )} />
+                    <span className="font-extrabold text-4xl tracking-tight">
+                      {latestReading.humedad != null ? `${latestReading.humedad}%` : '--'}
+                    </span>
+                  </div>
+                  <div className="text-center mt-1">
+                    {latestReading.humedad! < sensor.umbral_humedad_min ? (
+                      <span className="font-bold text-red-600 text-lg uppercase tracking-widest drop-shadow-sm">¡Regar Ahora!</span>
+                    ) : (
+                      <span className="font-bold text-sky-700 text-lg">Humedad Óptima</span>
+                    )}
+                    <p className="text-xs mt-1.5 opacity-80 font-medium bg-background/40 px-2 py-1 rounded-md inline-block">
+                      Umbral de riego: &lt; {sensor.umbral_humedad_min}%
+                    </p>
+                  </div>
                 </div>
-                <div className="flex flex-col bg-muted/40 rounded-lg p-2.5">
-                  <span className="text-[10px] uppercase text-muted-foreground font-semibold tracking-wider flex items-center gap-1 mb-1">
-                    <Thermometer className="w-3 h-3 text-orange-500" /> Temp.
-                  </span>
-                  <span className="font-bold text-xl leading-none text-foreground">
-                    {latestReading.temperatura != null ? `${latestReading.temperatura}` : '--'}
-                    <span className="text-xs font-normal text-muted-foreground ml-0.5">°C</span>
-                  </span>
-                </div>
-                <div className="flex flex-col bg-muted/40 rounded-lg p-2.5">
-                  <span className="text-[10px] uppercase text-muted-foreground font-semibold tracking-wider flex items-center gap-1 mb-1">
-                    <Activity className="w-3 h-3 text-emerald-600" /> EC
-                  </span>
-                  <span className="font-bold text-xl leading-none text-foreground">
-                    {latestReading.ec != null ? `${latestReading.ec}` : '--'}
-                    <span className="text-xs font-normal text-muted-foreground ml-0.5">dS/m</span>
+                <div className="flex items-center justify-between text-xs text-muted-foreground px-1">
+                  <div className="flex items-center gap-3">
+                    <span className="flex items-center gap-1.5 font-medium">
+                      <Battery className="w-4 h-4" />
+                      {latestReading.bateria != null ? `${latestReading.bateria}%` : '--'}
+                    </span>
+                  </div>
+                  <span className="tabular-nums font-medium">
+                    {formatDistanceToNow(parseISO(latestReading.timestamp), { addSuffix: true })}
                   </span>
                 </div>
               </div>
+            ) : (
+              <div className="space-y-3">
+                <div className="grid grid-cols-3 gap-2">
+                  <div className="flex flex-col bg-muted/40 rounded-lg p-2.5">
+                    <span className="text-[10px] uppercase text-muted-foreground font-semibold tracking-wider flex items-center gap-1 mb-1">
+                      <Droplets className="w-3 h-3 text-sky-500" /> Hum.
+                    </span>
+                    <span className="font-bold text-xl leading-none text-foreground">
+                      {latestReading.humedad != null ? `${latestReading.humedad}` : '--'}
+                      <span className="text-xs font-normal text-muted-foreground ml-0.5">%</span>
+                    </span>
+                  </div>
+                  <div className="flex flex-col bg-muted/40 rounded-lg p-2.5">
+                    <span className="text-[10px] uppercase text-muted-foreground font-semibold tracking-wider flex items-center gap-1 mb-1">
+                      <Thermometer className="w-3 h-3 text-orange-500" /> Temp.
+                    </span>
+                    <span className="font-bold text-xl leading-none text-foreground">
+                      {latestReading.temperatura != null ? `${latestReading.temperatura}` : '--'}
+                      <span className="text-xs font-normal text-muted-foreground ml-0.5">°C</span>
+                    </span>
+                  </div>
+                  <div className="flex flex-col bg-muted/40 rounded-lg p-2.5">
+                    <span className="text-[10px] uppercase text-muted-foreground font-semibold tracking-wider flex items-center gap-1 mb-1">
+                      <Activity className="w-3 h-3 text-emerald-600" /> EC
+                    </span>
+                    <span className="font-bold text-xl leading-none text-foreground">
+                      {latestReading.ec != null ? `${latestReading.ec}` : '--'}
+                      <span className="text-xs font-normal text-muted-foreground ml-0.5">dS/m</span>
+                    </span>
+                  </div>
+                </div>
 
-              <div className="flex items-center justify-between text-xs text-muted-foreground pt-2 border-t border-border/60">
-                <div className="flex items-center gap-3">
-                  <span className="flex items-center gap-1 font-medium">
-                    <Battery className="w-3.5 h-3.5" />
-                    {latestReading.bateria != null ? `${latestReading.bateria}%` : '--'}
-                  </span>
-                  <span className="flex items-center gap-1 font-medium">
-                    <Wifi className="w-3.5 h-3.5" />
-                    {latestReading.senal != null ? `${latestReading.senal} dBm` : '--'}
+                <div className="flex items-center justify-between text-xs text-muted-foreground pt-2 border-t border-border/60">
+                  <div className="flex items-center gap-3">
+                    <span className="flex items-center gap-1 font-medium">
+                      <Battery className="w-3.5 h-3.5" />
+                      {latestReading.bateria != null ? `${latestReading.bateria}%` : '--'}
+                    </span>
+                    <span className="flex items-center gap-1 font-medium">
+                      <Wifi className="w-3.5 h-3.5" />
+                      {latestReading.senal != null ? `${latestReading.senal} dBm` : '--'}
+                    </span>
+                  </div>
+                  <span className="text-muted-foreground tabular-nums">
+                    {formatDistanceToNow(parseISO(latestReading.timestamp), { addSuffix: true })}
                   </span>
                 </div>
-                <span className="text-muted-foreground tabular-nums">
-                  {formatDistanceToNow(parseISO(latestReading.timestamp), { addSuffix: true })}
-                </span>
               </div>
-            </div>
+            )
           ) : (
             <div className="h-24 flex items-center justify-center text-sm text-muted-foreground bg-muted/30 rounded-lg border border-dashed">
               Esperando primera lectura...
             </div>
           )}
 
-          {alerts.length > 0 && (
+          {alerts.length > 0 && sensor.tipo !== "riego" && (
             <div className="mt-3 text-xs font-semibold text-red-700 bg-red-50 p-2.5 rounded-lg border border-red-200 flex items-start gap-1.5">
               <AlertTriangle className="w-3.5 h-3.5 mt-0.5 shrink-0" />
               <span className="line-clamp-2">{alerts.join(" • ")}</span>

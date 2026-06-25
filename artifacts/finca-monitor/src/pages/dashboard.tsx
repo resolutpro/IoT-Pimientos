@@ -1,16 +1,11 @@
 import { useGetSensorsSummary, getGetSensorsSummaryQueryKey } from "@workspace/api-client-react";
-import { Plus } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { SensorCard } from "@/components/sensor-card";
-import { AddSensorDialog } from "@/components/add-sensor-dialog";
-import { useState } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 
 export default function Dashboard() {
   const { data: summaries, isLoading } = useGetSensorsSummary({
     query: { queryKey: getGetSensorsSummaryQueryKey(), refetchInterval: 30_000 },
   });
-  const [isAddOpen, setIsAddOpen] = useState(false);
 
   return (
     <div className="space-y-5">
@@ -21,14 +16,6 @@ export default function Dashboard() {
             {summaries ? `${summaries.length} zona${summaries.length !== 1 ? 's' : ''} monitoreada${summaries.length !== 1 ? 's' : ''}` : 'Cargando...'}
           </p>
         </div>
-        <Button
-          onClick={() => setIsAddOpen(true)}
-          data-testid="button-add-sensor"
-          size="lg"
-          className="shrink-0 h-11 px-5 font-semibold"
-        >
-          <Plus className="mr-2 h-4 w-4" /> Añadir
-        </Button>
       </div>
 
       {isLoading ? (
@@ -49,9 +36,7 @@ export default function Dashboard() {
       ) : summaries?.length === 0 ? (
         <div className="flex flex-col items-center justify-center p-12 bg-card rounded-xl border border-dashed">
           <p className="text-muted-foreground font-medium mb-4">No hay sensores configurados.</p>
-          <Button onClick={() => setIsAddOpen(true)} variant="outline" size="lg" className="h-11">
-            Configurar primer sensor
-          </Button>
+          <p className="text-sm text-muted-foreground">Configura los sensores en el archivo sensors.json</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
@@ -60,8 +45,6 @@ export default function Dashboard() {
           ))}
         </div>
       )}
-
-      <AddSensorDialog open={isAddOpen} onOpenChange={setIsAddOpen} />
     </div>
   );
 }

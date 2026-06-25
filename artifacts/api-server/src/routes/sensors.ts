@@ -3,8 +3,23 @@ import { db } from "@workspace/db";
 import { sensorsTable, readingsTable } from "@workspace/db";
 import { eq, desc, gte, and } from "drizzle-orm";
 import type { Sensor, Reading } from "@workspace/db";
+import fs from "fs/promises";
+import path from "path";
 
 const router: IRouter = Router();
+
+export type ConfigSensor = Sensor & { tipo: string };
+
+async function getSensorsConfig(): Promise<ConfigSensor[]> {
+  try {
+    const configPath = path.resolve(process.cwd(), "../../sensors.json");
+    const data = await fs.readFile(configPath, "utf-8");
+    return JSON.parse(data);
+  } catch (err) {
+    console.error("Error reading sensors.json:", err);
+    return [];
+  }
+}
 
 function computeStatus(
   reading: Reading | null,
@@ -47,46 +62,12 @@ function computeStatus(
 }
 
 router.get("/sensors", async (_req, res) => {
-  const sensors = await db.select().from(sensorsTable).orderBy(sensorsTable.nombre_zona);
+  const sensors = await getSensorsConfig();
   res.json(sensors);
 });
 
-router.post("/sensors", async (req, res) => {
-  const { id_sensor, nombre_zona, umbral_humedad_min, umbral_humedad_max, umbral_ec_max } =
-    req.body as {
-      id_sensor: string;
-      nombre_zona: string;
-      umbral_humedad_min: number;
-      umbral_humedad_max: number;
-      umbral_ec_max: number;
-    };
-
-  if (!id_sensor || !nombre_zona) {
-    res.status(400).json({ error: "id_sensor and nombre_zona are required" });
-    return;
-  }
-
-  const existing = await db
-    .select()
-    .from(sensorsTable)
-    .where(eq(sensorsTable.id_sensor, id_sensor))
-    .limit(1);
-
-  if (existing.length > 0) {
-    res.status(409).json({ error: "Sensor ID already exists" });
-    return;
-  }
-
-  const [created] = await db
-    .insert(sensorsTable)
-    .values({ id_sensor, nombre_zona, umbral_humedad_min, umbral_humedad_max, umbral_ec_max })
-    .returning();
-
-  res.status(201).json(created);
-});
-
 router.get("/sensors/summary", async (_req, res) => {
-  const sensors = await db.select().from(sensorsTable).orderBy(sensorsTable.nombre_zona);
+  const sensors = await getSensorsConfig();
 
   const summaries = await Promise.all(
     sensors.map(async (sensor) => {
@@ -112,11 +93,8 @@ router.get("/sensors/summary", async (_req, res) => {
 });
 
 router.get("/sensors/:id", async (req, res) => {
-  const [sensor] = await db
-    .select()
-    .from(sensorsTable)
-    .where(eq(sensorsTable.id_sensor, req.params.id))
-    .limit(1);
+  const sensors = await getSensorsConfig();
+  const sensor = sensors.find((s) => s.id_sensor === req.params.id);
 
   if (!sensor) {
     res.status(404).json({ error: "Sensor not found" });
@@ -126,57 +104,11 @@ router.get("/sensors/:id", async (req, res) => {
   res.json(sensor);
 });
 
-router.put("/sensors/:id", async (req, res) => {
-  const { nombre_zona, umbral_humedad_min, umbral_humedad_max, umbral_ec_max } =
-    req.body as {
-      nombre_zona?: string;
-      umbral_humedad_min?: number;
-      umbral_humedad_max?: number;
-      umbral_ec_max?: number;
-    };
-
-  const updates: Partial<Sensor> = {};
-  if (nombre_zona !== undefined) updates.nombre_zona = nombre_zona;
-  if (umbral_humedad_min !== undefined) updates.umbral_humedad_min = umbral_humedad_min;
-  if (umbral_humedad_max !== undefined) updates.umbral_humedad_max = umbral_humedad_max;
-  if (umbral_ec_max !== undefined) updates.umbral_ec_max = umbral_ec_max;
-
-  const [updated] = await db
-    .update(sensorsTable)
-    .set(updates)
-    .where(eq(sensorsTable.id_sensor, req.params.id))
-    .returning();
-
-  if (!updated) {
-    res.status(404).json({ error: "Sensor not found" });
-    return;
-  }
-
-  res.json(updated);
-});
-
-router.delete("/sensors/:id", async (req, res) => {
-  const [deleted] = await db
-    .delete(sensorsTable)
-    .where(eq(sensorsTable.id_sensor, req.params.id))
-    .returning();
-
-  if (!deleted) {
-    res.status(404).json({ error: "Sensor not found" });
-    return;
-  }
-
-  res.status(204).send();
-});
-
 router.get("/sensors/:id/readings", async (req, res) => {
   const range = (req.query["range"] as string) || "24h";
 
-  const [sensor] = await db
-    .select()
-    .from(sensorsTable)
-    .where(eq(sensorsTable.id_sensor, req.params.id))
-    .limit(1);
+  const sensors = await getSensorsConfig();
+  const sensor = sensors.find((s) => s.id_sensor === req.params.id);
 
   if (!sensor) {
     res.status(404).json({ error: "Sensor not found" });

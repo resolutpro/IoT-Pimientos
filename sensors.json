@@ -1,0 +1,18 @@
+[
+  {
+    "id_sensor": "sensor-1",
+    "nombre_zona": "Zona Norte (Riego)",
+    "tipo": "riego",
+    "umbral_humedad_min": 30,
+    "umbral_humedad_max": 80,
+    "umbral_ec_max": 3.0
+  },
+  {
+    "id_sensor": "sensor-2",
+    "nombre_zona": "Zona Sur (Completo)",
+    "tipo": "estandar",
+    "umbral_humedad_min": 30,
+    "umbral_humedad_max": 80,
+    "umbral_ec_max": 3.0
+  }
+]
