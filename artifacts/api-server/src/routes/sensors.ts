@@ -1,25 +1,11 @@
 import { Router, type IRouter } from "express";
 import { db } from "@workspace/db";
-import { sensorsTable, readingsTable } from "@workspace/db";
-import { eq, desc, gte, and } from "drizzle-orm";
+import { readingsTable } from "@workspace/db";
+import { eq, desc } from "drizzle-orm";
 import type { Sensor, Reading } from "@workspace/db";
-import fs from "fs/promises";
-import path from "path";
+import { getSensorsConfig } from "../lib/sensors";
 
 const router: IRouter = Router();
-
-export type ConfigSensor = Sensor & { tipo: string };
-
-async function getSensorsConfig(): Promise<ConfigSensor[]> {
-  try {
-    const configPath = path.resolve(process.cwd(), "../../sensors.json");
-    const data = await fs.readFile(configPath, "utf-8");
-    return JSON.parse(data);
-  } catch (err) {
-    console.error("Error reading sensors.json:", err);
-    return [];
-  }
-}
 
 function computeStatus(
   reading: Reading | null,

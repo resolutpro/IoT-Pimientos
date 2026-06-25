@@ -1,9 +1,9 @@
 import mqtt from "mqtt";
-import { db } from "@workspace/db";
-import { sensorsTable, readingsTable } from "@workspace/db";
+import { db, readingsTable } from "@workspace/db";
 import { eq } from "drizzle-orm";
 import { logger } from "./logger";
 import { checkThresholdsAndAlert } from "./telegram";
+import { getSensorsConfig } from "./sensors";
 
 let mqttClient: mqtt.MqttClient | null = null;
 
@@ -41,11 +41,8 @@ async function handleMessage(topic: string, payload: Buffer): Promise<void> {
   if (!data) return;
 
   try {
-    const [sensor] = await db
-      .select()
-      .from(sensorsTable)
-      .where(eq(sensorsTable.id_sensor, sensorId))
-      .limit(1);
+    const sensors = await getSensorsConfig();
+    const sensor = sensors.find((s) => s.id_sensor === sensorId);
 
     if (!sensor) {
       logger.warn({ sensorId }, "Received data for unknown sensor, skipping");
@@ -81,10 +78,14 @@ async function handleMessage(topic: string, payload: Buffer): Promise<void> {
 }
 
 export function startMqttClient(): void {
-  const brokerUrl = process.env["MQTT_BROKER_URL"];
+  let brokerUrl = process.env["MQTT_BROKER_URL"];
   if (!brokerUrl) {
     logger.warn("MQTT_BROKER_URL not set, MQTT client will not start");
     return;
+  }
+
+  if (!brokerUrl.startsWith("mqtt://") && !brokerUrl.startsWith("mqtts://") && !brokerUrl.startsWith("ws://") && !brokerUrl.startsWith("wss://")) {
+    brokerUrl = `mqtt://${brokerUrl}`;
   }
 
   const options: mqtt.IClientOptions = {};
