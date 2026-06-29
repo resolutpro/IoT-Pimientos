@@ -71,6 +71,8 @@ export type GetSensorReadingsParams = {
    * Time range — 24h (default) or 7d
    */
   range?: GetSensorReadingsRange;
+  from?: string;
+  to?: string;
 };
 
 export type GetSensorReadingsRange =

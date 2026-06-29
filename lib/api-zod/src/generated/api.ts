@@ -85,11 +85,15 @@ export const GetSensorReadingsParams = zod.object({
   id: zod.coerce.string(),
 });
 
+export const getSensorReadingsQueryRangeDefault = `24h`;
+
 export const GetSensorReadingsQueryParams = zod.object({
   range: zod
     .enum(["24h", "7d"])
-    .optional()
+    .default(getSensorReadingsQueryRangeDefault)
     .describe("Time range — 24h (default) or 7d"),
+  from: zod.date().optional(),
+  to: zod.date().optional(),
 });
 
 export const GetSensorReadingsResponseItem = zod.object({

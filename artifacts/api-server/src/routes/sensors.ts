@@ -1,7 +1,7 @@
 import { Router, type IRouter } from "express";
 import { db } from "@workspace/db";
 import { readingsTable } from "@workspace/db";
-import { eq, desc } from "drizzle-orm";
+import { eq, desc, gte, lte, and } from "drizzle-orm";
 import type { Sensor, Reading } from "@workspace/db";
 import { getSensorsConfig } from "../lib/sensors";
 
@@ -91,7 +91,9 @@ router.get("/sensors/:id", async (req, res) => {
 });
 
 router.get("/sensors/:id/readings", async (req, res) => {
-  const range = (req.query["range"] as string) || "24h";
+  const fromQuery = req.query["from"] as string | undefined;
+  const toQuery = req.query["to"] as string | undefined;
+  const rangeQuery = req.query["range"] as string | undefined;
 
   const sensors = await getSensorsConfig();
   const sensor = sensors.find((s) => s.id_sensor === req.params.id);
@@ -101,8 +103,20 @@ router.get("/sensors/:id/readings", async (req, res) => {
     return;
   }
 
-  const hours = range === "7d" ? 7 * 24 : 24;
-  const since = new Date(Date.now() - hours * 60 * 60 * 1000);
+  let fromDate: Date;
+  let toDate = new Date(); // now
+
+  if (fromQuery) {
+    fromDate = new Date(fromQuery);
+  } else if (rangeQuery === "7d") {
+    fromDate = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+  } else {
+    fromDate = new Date(Date.now() - 24 * 60 * 60 * 1000); // 24h default
+  }
+
+  if (toQuery) {
+    toDate = new Date(toQuery);
+  }
 
   const readings = await db
     .select()
@@ -110,7 +124,8 @@ router.get("/sensors/:id/readings", async (req, res) => {
     .where(
       and(
         eq(readingsTable.sensor_id, req.params.id),
-        gte(readingsTable.timestamp, since)
+        gte(readingsTable.timestamp, fromDate),
+        lte(readingsTable.timestamp, toDate)
       )
     )
     .orderBy(readingsTable.timestamp);

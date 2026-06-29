@@ -6,24 +6,33 @@ import {
   getGetSensorReadingsQueryKey,
 } from "@workspace/api-client-react";
 import { useState } from "react";
-import { ChevronLeft, Battery, Wifi, Droplets, Thermometer, Activity } from "lucide-react";
+import { ChevronLeft, Battery, Wifi, Droplets, Thermometer, Activity, CalendarIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { format, parseISO } from "date-fns";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, Legend } from "recharts";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { cn } from "@/lib/utils";
+import type { DateRange } from "react-day-picker";
 
 export default function SensorDetail() {
   const { id } = useParams<{ id: string }>();
-  const [range, setRange] = useState<"24h" | "7d">("24h");
+  const [range, setRange] = useState<"24h" | "7d" | "custom">("24h");
+  const [date, setDate] = useState<DateRange | undefined>();
 
   const { data: sensor, isLoading: isLoadingSensor } = useGetSensor(id!, {
     query: { enabled: !!id, queryKey: getGetSensorQueryKey(id!), refetchInterval: 30_000 }
   });
 
-  const { data: readings, isLoading: isLoadingReadings } = useGetSensorReadings(id!, { range }, {
-    query: { enabled: !!id, queryKey: getGetSensorReadingsQueryKey(id!, { range }), refetchInterval: 30_000 }
+  const queryParams = range === "custom" && date?.from
+    ? { from: date.from.toISOString(), to: (date.to || new Date()).toISOString() }
+    : { range: range === "custom" ? "24h" : range };
+
+  const { data: readings, isLoading: isLoadingReadings } = useGetSensorReadings(id!, queryParams, {
+    query: { enabled: !!id, queryKey: getGetSensorReadingsQueryKey(id!, queryParams), refetchInterval: 30_000 }
   });
 
   const latestReading = readings && readings.length > 0 ? readings[readings.length - 1] : null;
@@ -56,7 +65,7 @@ export default function SensorDetail() {
   }
 
   const chartData = readings?.map(r => ({
-    time: format(parseISO(r.timestamp), range === "24h" ? "HH:mm" : "MMM dd HH:mm"),
+    time: format(parseISO(r.timestamp), (range === "24h" || (range === "custom" && date?.to && date.from && date.to.getTime() - date.from.getTime() <= 24 * 60 * 60 * 1000)) ? "HH:mm" : "MMM dd HH:mm"),
     humidity: r.humedad,
     temperature: r.temperatura,
   })) || [];
@@ -96,12 +105,58 @@ export default function SensorDetail() {
       </div>
 
       <Card>
-        <CardHeader className="flex flex-row items-center justify-between pb-2 gap-3">
+        <CardHeader className="flex flex-col sm:flex-row items-start sm:items-center justify-between pb-2 gap-3">
           <CardTitle className="text-base font-semibold">Historial de Lecturas</CardTitle>
-          <ToggleGroup type="single" value={range} onValueChange={(v) => v && setRange(v as "24h" | "7d")}>
-            <ToggleGroupItem value="24h" aria-label="Ultimas 24 horas" className="h-9 px-4 font-medium">24h</ToggleGroupItem>
-            <ToggleGroupItem value="7d" aria-label="Ultimos 7 dias" className="h-9 px-4 font-medium">7d</ToggleGroupItem>
-          </ToggleGroup>
+          <div className="flex flex-wrap items-center gap-2">
+            <ToggleGroup type="single" value={range} onValueChange={(v) => {
+              if (v) {
+                setRange(v as "24h" | "7d" | "custom");
+                if (v !== "custom") setDate(undefined);
+              }
+            }}>
+              <ToggleGroupItem value="24h" aria-label="Ultimas 24 horas" className="h-9 px-4 font-medium">24h</ToggleGroupItem>
+              <ToggleGroupItem value="7d" aria-label="Ultimos 7 dias" className="h-9 px-4 font-medium">7d</ToggleGroupItem>
+              <ToggleGroupItem value="custom" aria-label="Rango personalizado" className="h-9 px-4 font-medium">Personalizado</ToggleGroupItem>
+            </ToggleGroup>
+            
+            {range === "custom" && (
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant={"outline"}
+                    className={cn(
+                      "h-9 justify-start text-left font-normal",
+                      !date && "text-muted-foreground"
+                    )}
+                  >
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {date?.from ? (
+                      date.to ? (
+                        <>
+                          {format(date.from, "LLL dd, y")} -{" "}
+                          {format(date.to, "LLL dd, y")}
+                        </>
+                      ) : (
+                        format(date.from, "LLL dd, y")
+                      )
+                    ) : (
+                      <span>Seleccionar fechas</span>
+                    )}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="end">
+                  <Calendar
+                    initialFocus
+                    mode="range"
+                    defaultMonth={date?.from}
+                    selected={date}
+                    onSelect={setDate}
+                    numberOfMonths={2}
+                  />
+                </PopoverContent>
+              </Popover>
+            )}
+          </div>
         </CardHeader>
         <CardContent>
           {isLoadingReadings ? (
