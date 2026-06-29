@@ -5,14 +5,28 @@
     "tipo": "riego",
     "umbral_humedad_min": 30,
     "umbral_humedad_max": 80,
-    "umbral_ec_max": 3.0
+    "umbral_ec_max": 3.0,
+    "mqtt_topic": "finca/sensor-1/datos",
+    "mapeo_variables": {
+      "humedad": "humedad",
+      "temperatura": "temperatura",
+      "ec": "ec",
+      "bateria": "bateria",
+      "senal": "senal"
+    }
   },
   {
-    "id_sensor": "sensor-2",
-    "nombre_zona": "Zona Sur (Completo)",
+    "id_sensor": "sensor-comercial-x",
+    "nombre_zona": "Invernadero Sur",
     "tipo": "estandar",
-    "umbral_humedad_min": 30,
-    "umbral_humedad_max": 80,
-    "umbral_ec_max": 3.0
+    "umbral_humedad_min": 40,
+    "umbral_humedad_max": 85,
+    "umbral_ec_max": 2.5,
+    "mqtt_topic": "telemetry/sensor-x/state",
+    "mapeo_variables": {
+      "humedad": "hum",
+      "temperatura": "temp",
+      "bateria": "bat"
+    }
   }
 ]
