@@ -2,7 +2,11 @@ import fs from "fs/promises";
 import path from "path";
 import type { Sensor } from "@workspace/db";
 
-export type ConfigSensor = Sensor & { tipo: string };
+export type ConfigSensor = Sensor & { 
+  tipo: string;
+  mqtt_topic?: string;
+  mapeo_variables?: Record<string, string>;
+};
 
 export async function getSensorsConfig(): Promise<ConfigSensor[]> {
   try {

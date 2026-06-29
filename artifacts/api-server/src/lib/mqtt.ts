@@ -7,19 +7,9 @@ import { getSensorsConfig } from "./sensors";
 
 let mqttClient: mqtt.MqttClient | null = null;
 
-interface SE01Payload {
-  humedad?: number;
-  temperatura?: number;
-  ec?: number;
-  bateria?: number;
-  senal?: number;
-  [key: string]: unknown;
-}
-
-function parseSE01Payload(raw: string): SE01Payload | null {
+function parsePayload(raw: string): Record<string, unknown> | null {
   try {
-    const parsed = JSON.parse(raw) as SE01Payload;
-    return parsed;
+    return JSON.parse(raw);
   } catch {
     logger.warn({ raw }, "Could not parse MQTT payload as JSON");
     return null;
@@ -30,32 +20,51 @@ async function handleMessage(topic: string, payload: Buffer): Promise<void> {
   const raw = payload.toString();
   logger.info({ topic, raw }, "MQTT message received");
 
-  const parts = topic.split("/");
-  if (parts.length < 3) {
-    logger.warn({ topic }, "Unexpected topic format, expected finca/<id>/datos");
-    return;
-  }
-  const sensorId = parts[1];
-
-  const data = parseSE01Payload(raw);
-  if (!data) return;
-
   try {
     const sensors = await getSensorsConfig();
-    const sensor = sensors.find((s) => s.id_sensor === sensorId);
+    
+    let sensor = sensors.find((s) => s.mqtt_topic === topic);
+    let sensorId = sensor?.id_sensor;
 
     if (!sensor) {
-      logger.warn({ sensorId }, "Received data for unknown sensor, skipping");
+      const parts = topic.split("/");
+      if (parts.length === 3 && parts[0] === "finca" && parts[2] === "datos") {
+        sensorId = parts[1];
+        sensor = sensors.find((s) => s.id_sensor === sensorId);
+      }
+    }
+
+    if (!sensor || !sensorId) {
+      logger.warn({ topic }, "Received data for unknown sensor or topic, skipping");
       return;
     }
 
+    const rawData = parsePayload(raw);
+    if (!rawData) return;
+
+    const mapKey = (stdKey: string) => {
+      const rawKey = sensor!.mapeo_variables?.[stdKey] || stdKey;
+      const val = rawData[rawKey];
+      if (val !== undefined && val !== null) {
+        const num = Number(val);
+        return isNaN(num) ? null : num;
+      }
+      return null;
+    };
+
+    const humedad = mapKey("humedad");
+    const temperatura = mapKey("temperatura");
+    const ec = mapKey("ec");
+    const bateria = mapKey("bateria");
+    const senal = mapKey("senal");
+
     await db.insert(readingsTable).values({
       sensor_id: sensorId,
-      humedad: data.humedad ?? null,
-      temperatura: data.temperatura ?? null,
-      ec: data.ec ?? null,
-      bateria: data.bateria ?? null,
-      senal: data.senal ?? null,
+      humedad,
+      temperatura,
+      ec,
+      bateria,
+      senal,
     });
 
     logger.info({ sensorId }, "Reading saved");
@@ -63,9 +72,9 @@ async function handleMessage(topic: string, payload: Buffer): Promise<void> {
     await checkThresholdsAndAlert(
       sensorId,
       sensor.nombre_zona,
-      data.humedad ?? null,
-      data.ec ?? null,
-      data.bateria ?? null,
+      humedad,
+      ec,
+      bateria,
       {
         umbral_humedad_min: sensor.umbral_humedad_min,
         umbral_humedad_max: sensor.umbral_humedad_max,
@@ -73,7 +82,7 @@ async function handleMessage(topic: string, payload: Buffer): Promise<void> {
       }
     );
   } catch (err) {
-    logger.error({ err, sensorId }, "Error processing MQTT message");
+    logger.error({ err, topic }, "Error processing MQTT message");
   }
 }
 
@@ -99,12 +108,26 @@ export function startMqttClient(): void {
 
   mqttClient.on("connect", () => {
     logger.info({ brokerUrl }, "MQTT connected");
-    mqttClient!.subscribe("finca/+/datos", { qos: 1 }, (err) => {
-      if (err) {
-        logger.error({ err }, "MQTT subscribe error");
-      } else {
-        logger.info("Subscribed to finca/+/datos");
+
+    getSensorsConfig().then(sensors => {
+      const topics = new Set<string>();
+      topics.add("finca/+/datos"); // standard fallback
+      
+      for (const s of sensors) {
+        if (s.mqtt_topic) topics.add(s.mqtt_topic);
       }
+
+      for (const t of topics) {
+        mqttClient!.subscribe(t, { qos: 1 }, (err) => {
+          if (err) {
+            logger.error({ err, topic: t }, "MQTT subscribe error");
+          } else {
+            logger.info({ topic: t }, "Subscribed to topic");
+          }
+        });
+      }
+    }).catch(err => {
+      logger.error({ err }, "Failed to load sensors config for MQTT subscription");
     });
   });
 
