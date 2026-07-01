@@ -16,20 +16,5 @@
       "bateria": "field5",
       "senal": "field6"
     }
-  },
-  {
-    "id_sensor": "sensor-comercial-x",
-    "nombre_zona": "Invernadero Sur",
-    "tipo": "estandar",
-    "umbral_humedad_min": 40,
-    "umbral_humedad_max": 85,
-    "umbral_ec_max": 2.5,
-    "mqtt_topic": "telemetry/sensor-x/state",
-    "thingspeak_channel_id": "654321",
-    "mapeo_variables": {
-      "humedad": "field1",
-      "temperatura": "field2",
-      "bateria": "field5"
-    }
   }
 ]
