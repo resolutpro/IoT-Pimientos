@@ -74,7 +74,6 @@ export function SensorCard({ summary }: SensorCardProps) {
           {latestReading ? (
             sensor.tipo === "riego" ? (
               <div className="flex flex-col gap-4">
-              <div className="flex flex-col gap-4">
                 <div className="flex flex-col gap-3 p-4 rounded-xl border-2 shadow-sm bg-card border-border/60">
                   <div className="flex justify-between items-center mb-1">
                     <span className="font-semibold text-muted-foreground flex items-center gap-1.5">
