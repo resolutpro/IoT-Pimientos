@@ -23,5 +23,9 @@ app.listen(port, (err) => {
   }
 
   logger.info({ port }, "Server listening");
-  startMqttClient();
+  if (process.env.IOT_INGEST_MODE !== "webhook_only") {
+    startMqttClient();
+  } else {
+    logger.info("IOT_INGEST_MODE is webhook_only, MQTT client will not start");
+  }
 });

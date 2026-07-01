@@ -5,6 +5,7 @@ import type { Sensor } from "@workspace/db";
 export type ConfigSensor = Sensor & { 
   tipo: string;
   mqtt_topic?: string;
+  thingspeak_channel_id?: string;
   mapeo_variables?: Record<string, string>;
 };
 
