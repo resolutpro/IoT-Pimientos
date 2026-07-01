@@ -7,11 +7,12 @@
     "umbral_humedad_max": 80,
     "umbral_ec_max": 3.0,
     "mqtt_topic": "finca/sensor-1/datos",
-    "thingspeak_channel_id": "123456",
+    "thingspeak_channel_id": "3419938",
     "mapeo_variables": {
-      "humedad": "field1",
-      "temperatura": "field2",
-      "ec": "field3",
+      "temperatura": "field1",
+      "humedad": "field2",
+      "conductividad": "field3",
+      "ec": "field4",
       "bateria": "field5",
       "senal": "field6"
     }
