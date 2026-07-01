@@ -1,7 +1,7 @@
 [
   {
     "id_sensor": "sensor-1",
-    "nombre_zona": "Zona Norte (Riego)",
+    "nombre_zona": "Sensor de Riego",
     "tipo": "riego",
     "umbral_humedad_min": 30,
     "umbral_humedad_max": 80,
