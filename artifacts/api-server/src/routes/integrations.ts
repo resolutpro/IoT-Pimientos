@@ -1,5 +1,5 @@
 import { Router, type IRouter } from "express";
-import { db, readingsTable } from "@workspace/db";
+import { db, readingsTable, sensorsTable } from "@workspace/db";
 import { and, eq } from "drizzle-orm";
 import { getSensorsConfig } from "../lib/sensors";
 import { logger } from "../lib/logger";
@@ -93,6 +93,25 @@ router.post("/thingspeak", async (req, res) => {
     const ec = mapKey("ec");
     const bateria = mapKey("bateria");
     const senal = mapKey("senal");
+
+    // Upsert the sensor into the database to satisfy the foreign key constraint
+    await db.insert(sensorsTable)
+      .values({
+        id_sensor: sensor.id_sensor,
+        nombre_zona: sensor.nombre_zona,
+        umbral_humedad_min: sensor.umbral_humedad_min,
+        umbral_humedad_max: sensor.umbral_humedad_max,
+        umbral_ec_max: sensor.umbral_ec_max,
+      })
+      .onConflictDoUpdate({
+        target: sensorsTable.id_sensor,
+        set: {
+          nombre_zona: sensor.nombre_zona,
+          umbral_humedad_min: sensor.umbral_humedad_min,
+          umbral_humedad_max: sensor.umbral_humedad_max,
+          umbral_ec_max: sensor.umbral_ec_max,
+        }
+      });
 
     await db.insert(readingsTable).values({
       sensor_id: sensor.id_sensor,
