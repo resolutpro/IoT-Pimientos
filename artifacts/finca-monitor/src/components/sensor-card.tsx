@@ -102,6 +102,16 @@ export function SensorCard({ summary }: SensorCardProps) {
                       )} 
                       style={{ width: `${Math.min(100, Math.max(0, latestReading.humedad ?? 0))}%` }} 
                     />
+
+                    {/* Value Thumb Indicator (Pelota) */}
+                    <div 
+                      className={cn(
+                        "absolute top-1/2 -translate-y-1/2 w-4 h-4 rounded-full shadow-md border-2 border-white dark:border-slate-900 transition-all duration-500 z-20",
+                        latestReading.humedad! < sensor.umbral_humedad_min ? "bg-red-500" : 
+                        latestReading.humedad! > sensor.umbral_humedad_max ? "bg-orange-500" : "bg-emerald-500"
+                      )}
+                      style={{ left: `calc(${Math.min(100, Math.max(0, latestReading.humedad ?? 0))}% - 8px)` }}
+                    />
                     
                     {/* Min Marker */}
                     <div className="absolute top-0 bottom-0 w-0.5 bg-slate-400 dark:bg-slate-500 z-10" style={{ left: `${sensor.umbral_humedad_min}%` }} />
