@@ -16,10 +16,7 @@ export const readingsTable = pgTable("readings", {
   senal: real("senal"),
   source: text("source").default("mqtt"),
   channel_id: text("channel_id"),
-  entry_id: text("entry_id"),
-}, (t) => ({
-  unique_channel_entry: unique().on(t.channel_id, t.entry_id).nullsNotDistinct(),
-}));
+});
 
 export const insertReadingSchema = createInsertSchema(readingsTable).omit({ id: true });
 export type InsertReading = z.infer<typeof insertReadingSchema>;

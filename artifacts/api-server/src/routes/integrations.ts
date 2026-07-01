@@ -34,7 +34,7 @@ router.use((req, res, next) => {
 
 router.post("/thingspeak", async (req, res) => {
   try {
-    const { channel_id, sensor_id, entry_id, created_at, ...fields } = req.body;
+    const { channel_id, sensor_id, created_at, ...fields } = req.body;
 
     // Use channel_id from body if present, else fallback to something else, or reject
     const actualChannelId = channel_id ? String(channel_id) : null;
@@ -52,28 +52,7 @@ router.post("/thingspeak", async (req, res) => {
       return;
     }
 
-    const actualEntryId = entry_id ? String(entry_id) : null;
     const timestamp = created_at ? new Date(created_at) : new Date();
-
-    // Deduplication check
-    if (actualEntryId) {
-      const existing = await db
-        .select()
-        .from(readingsTable)
-        .where(
-          and(
-            eq(readingsTable.channel_id, actualChannelId),
-            eq(readingsTable.entry_id, actualEntryId)
-          )
-        )
-        .limit(1);
-
-      if (existing.length > 0) {
-        logger.info({ channel_id: actualChannelId, entry_id: actualEntryId }, "Duplicate reading, skipping");
-        res.status(200).json({ message: "Duplicate, ignored" });
-        return;
-      }
-    }
 
     // Dynamic mapping
     const rawData = { ...req.body, ...fields };
@@ -123,7 +102,6 @@ router.post("/thingspeak", async (req, res) => {
       senal,
       source: "thingspeak",
       channel_id: actualChannelId,
-      entry_id: actualEntryId,
     });
 
     logger.info({ sensorId: sensor.id_sensor }, "ThingSpeak reading saved");
