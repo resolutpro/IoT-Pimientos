@@ -14,23 +14,37 @@ export type ConfigSensor = Sensor & {
   mapeo_variables?: Record<string, string>;
 };
 
-export async function getSensorsConfig(): Promise<ConfigSensor[]> {
-  const possiblePaths = [
-    path.resolve(process.cwd(), "sensors.json"),
-    path.resolve(process.cwd(), "../../sensors.json"),
-    path.resolve(__dirname, "../../../sensors.json"),
-    path.resolve(__dirname, "../../../../sensors.json"),
-  ];
-
-  for (const configPath of possiblePaths) {
-    try {
-      const data = await fs.readFile(configPath, "utf-8");
-      return JSON.parse(data);
-    } catch (err) {
-      // continue searching
-    }
+async function findSensorsJson(dir: string): Promise<string | null> {
+  const currentPath = path.join(dir, "sensors.json");
+  try {
+    await fs.access(currentPath);
+    return currentPath;
+  } catch {
+    const parentDir = path.dirname(dir);
+    if (parentDir === dir) return null; // Root directory reached
+    return findSensorsJson(parentDir);
   }
+}
 
-  console.error("Error reading sensors.json. Looked in:", possiblePaths);
-  return [];
+export async function getSensorsConfig(): Promise<ConfigSensor[]> {
+  try {
+    // Search upwards starting from the current file's directory
+    let configPath = await findSensorsJson(__dirname);
+    
+    // Fallback: search upwards from the current working directory
+    if (!configPath) {
+      configPath = await findSensorsJson(process.cwd());
+    }
+
+    if (!configPath) {
+      console.error("Error: sensors.json not found in any parent directories of", __dirname, "or", process.cwd());
+      return [];
+    }
+
+    const data = await fs.readFile(configPath, "utf-8");
+    return JSON.parse(data);
+  } catch (err) {
+    console.error("Error reading or parsing sensors.json:", err);
+    return [];
+  }
 }
