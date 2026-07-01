@@ -22,6 +22,7 @@ export default function SensorDetail() {
   const { id } = useParams<{ id: string }>();
   const [range, setRange] = useState<"24h" | "7d" | "custom">("24h");
   const [date, setDate] = useState<DateRange | undefined>();
+  const [selectedVariable, setSelectedVariable] = useState<"humedad" | "temperatura" | "ec" | "bateria" | "senal">("humedad");
 
   const { data: sensor, isLoading: isLoadingSensor } = useGetSensor(id!, {
     query: { enabled: !!id, queryKey: getGetSensorQueryKey(id!), refetchInterval: 30_000 }
@@ -66,8 +67,11 @@ export default function SensorDetail() {
 
   const chartData = readings?.map(r => ({
     time: format(parseISO(r.timestamp), (range === "24h" || (range === "custom" && date?.to && date.from && date.to.getTime() - date.from.getTime() <= 24 * 60 * 60 * 1000)) ? "HH:mm" : "MMM dd HH:mm"),
-    humidity: r.humedad,
-    temperature: r.temperatura,
+    humedad: r.humedad,
+    temperatura: r.temperatura,
+    ec: r.ec,
+    bateria: r.bateria,
+    senal: r.senal,
   })) || [];
 
   return (
@@ -89,7 +93,7 @@ export default function SensorDetail() {
           { label: "Humedad", value: latestReading?.humedad != null ? `${latestReading.humedad}%` : '--', icon: Droplets, color: "text-sky-600" },
           { label: "Temp.", value: latestReading?.temperatura != null ? `${latestReading.temperatura}°C` : '--', icon: Thermometer, color: "text-orange-500" },
           { label: "EC", value: latestReading?.ec != null ? `${latestReading.ec} dS/m` : '--', icon: Activity, color: "text-emerald-600" },
-          { label: "Batería", value: latestReading?.bateria != null ? `${latestReading.bateria}%` : '--', icon: Battery, color: "text-green-600" },
+          { label: "Batería", value: latestReading?.bateria != null ? `${latestReading.bateria} V` : '--', icon: Battery, color: "text-green-600" },
           { label: "Señal", value: latestReading?.senal != null ? `${latestReading.senal} dBm` : '--', icon: Wifi, color: "text-slate-500" },
         ].map(({ label, value, icon: Icon, color }) => (
           <Card key={label}>
@@ -106,7 +110,16 @@ export default function SensorDetail() {
 
       <Card>
         <CardHeader className="flex flex-col sm:flex-row items-start sm:items-center justify-between pb-2 gap-3">
-          <CardTitle className="text-base font-semibold">Historial de Lecturas</CardTitle>
+          <div className="flex flex-col gap-2">
+            <CardTitle className="text-base font-semibold">Historial de Lecturas</CardTitle>
+            <ToggleGroup type="single" value={selectedVariable} onValueChange={(v) => { if (v) setSelectedVariable(v as any); }} className="justify-start border rounded-md p-1 bg-muted/20">
+              <ToggleGroupItem value="humedad" className="h-7 px-2.5 text-xs rounded-sm data-[state=on]:bg-sky-100 data-[state=on]:text-sky-800 dark:data-[state=on]:bg-sky-900 dark:data-[state=on]:text-sky-100">Humedad</ToggleGroupItem>
+              <ToggleGroupItem value="temperatura" className="h-7 px-2.5 text-xs rounded-sm data-[state=on]:bg-orange-100 data-[state=on]:text-orange-800 dark:data-[state=on]:bg-orange-900 dark:data-[state=on]:text-orange-100">Temp</ToggleGroupItem>
+              <ToggleGroupItem value="ec" className="h-7 px-2.5 text-xs rounded-sm data-[state=on]:bg-emerald-100 data-[state=on]:text-emerald-800 dark:data-[state=on]:bg-emerald-900 dark:data-[state=on]:text-emerald-100">EC</ToggleGroupItem>
+              <ToggleGroupItem value="bateria" className="h-7 px-2.5 text-xs rounded-sm data-[state=on]:bg-green-100 data-[state=on]:text-green-800 dark:data-[state=on]:bg-green-900 dark:data-[state=on]:text-green-100">Batería</ToggleGroupItem>
+              <ToggleGroupItem value="senal" className="h-7 px-2.5 text-xs rounded-sm data-[state=on]:bg-slate-200 data-[state=on]:text-slate-800 dark:data-[state=on]:bg-slate-800 dark:data-[state=on]:text-slate-100">Señal</ToggleGroupItem>
+            </ToggleGroup>
+          </div>
           <div className="flex flex-wrap items-center gap-2">
             <ToggleGroup type="single" value={range} onValueChange={(v) => {
               if (v) {
@@ -186,15 +199,6 @@ export default function SensorDetail() {
                     axisLine={false}
                     domain={['auto', 'auto']}
                   />
-                  <YAxis
-                    yAxisId="right"
-                    orientation="right"
-                    stroke="hsl(var(--chart-2))"
-                    fontSize={11}
-                    tickLine={false}
-                    axisLine={false}
-                    domain={['auto', 'auto']}
-                  />
                   <RechartsTooltip
                     contentStyle={{
                       backgroundColor: 'hsl(var(--popover))',
@@ -205,8 +209,7 @@ export default function SensorDetail() {
                     labelStyle={{ color: 'hsl(var(--foreground))', fontWeight: '600', marginBottom: '4px' }}
                   />
                   <Legend wrapperStyle={{ paddingTop: '16px', fontSize: '12px' }} />
-                  <Line yAxisId="left" type="monotone" dataKey="humidity" name="Humedad (%)" stroke="hsl(var(--chart-1))" strokeWidth={2.5} dot={false} activeDot={{ r: 5 }} />
-                  <Line yAxisId="right" type="monotone" dataKey="temperature" name="Temp (°C)" stroke="hsl(var(--chart-2))" strokeWidth={2.5} dot={false} activeDot={{ r: 5 }} />
+                  <Line yAxisId="left" type="monotone" dataKey={selectedVariable} name={selectedVariable.toUpperCase()} stroke="hsl(var(--chart-1))" strokeWidth={2.5} dot={false} activeDot={{ r: 5 }} />
                 </LineChart>
               </ResponsiveContainer>
             </div>
