@@ -212,6 +212,13 @@ export function SensorCard({ summary }: SensorCardProps) {
               <span className="line-clamp-2">{alerts.join(" • ")}</span>
             </div>
           )}
+
+          {summary.recommendation && sensor.tipo === "riego" && (
+            <div className="mt-3 text-xs font-semibold text-sky-700 bg-sky-50 p-2.5 rounded-lg border border-sky-200 flex items-start gap-1.5">
+              <Droplets className="w-3.5 h-3.5 mt-0.5 shrink-0" />
+              <span className="line-clamp-2">{summary.recommendation}</span>
+            </div>
+          )}
         </CardContent>
       </Card>
     </Link>

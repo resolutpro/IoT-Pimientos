@@ -56,6 +56,7 @@ export const GetSensorsSummaryResponseItem = zod.object({
     .nullish(),
   status: zod.enum(["ok", "warning", "critical", "unknown"]),
   alerts: zod.array(zod.string()),
+  recommendation: zod.string().nullish(),
 });
 export const GetSensorsSummaryResponse = zod.array(
   GetSensorsSummaryResponseItem,

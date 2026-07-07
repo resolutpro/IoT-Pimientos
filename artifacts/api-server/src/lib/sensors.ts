@@ -12,6 +12,10 @@ export type ConfigSensor = Sensor & {
   mqtt_topic?: string;
   thingspeak_channel_id?: string;
   mapeo_variables?: Record<string, string>;
+  ubicacion?: {
+    lat: number;
+    lon: number;
+  };
 };
 
 async function findSensorsJson(dir: string): Promise<string | null> {

@@ -8,6 +8,10 @@
     "umbral_ec_max": 3.0,
     "mqtt_topic": "finca/sensor-1/datos",
     "thingspeak_channel_id": "3419938",
+    "ubicacion": {
+      "lat": 42.5833,
+      "lon": -6.6667
+    },
     "mapeo_variables": {
       "temperatura": "field1",
       "humedad": "field2",

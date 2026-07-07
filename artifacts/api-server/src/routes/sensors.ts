@@ -4,6 +4,7 @@ import { readingsTable } from "@workspace/db";
 import { eq, desc, gte, lte, and } from "drizzle-orm";
 import type { Sensor, Reading } from "@workspace/db";
 import { getSensorsConfig } from "../lib/sensors";
+import { getWateringRecommendation } from "../lib/wateringLogic";
 
 const router: IRouter = Router();
 
@@ -65,12 +66,18 @@ router.get("/sensors/summary", async (_req, res) => {
         .limit(1);
 
       const { status, alerts } = computeStatus(latestReading ?? null, sensor);
+      
+      let recommendation = null;
+      if (sensor.tipo === "riego") {
+        recommendation = await getWateringRecommendation(sensor.id_sensor, sensor as any);
+      }
 
       return {
         sensor,
         latestReading: latestReading ?? null,
         status,
         alerts,
+        recommendation,
       };
     })
   );

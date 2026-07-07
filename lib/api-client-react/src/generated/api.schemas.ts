@@ -60,6 +60,7 @@ export interface SensorSummary {
   latestReading?: Reading | null;
   status: SensorSummaryStatus;
   alerts: string[];
+  recommendation?: string | null;
 }
 
 export interface ErrorResponse {

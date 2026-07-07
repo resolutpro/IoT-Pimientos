@@ -245,6 +245,9 @@ components:
           type: array
           items:
             type: string
+        recommendation:
+          type: string
+          nullable: true
       required:
         - sensor
         - status
