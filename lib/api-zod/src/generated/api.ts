@@ -26,6 +26,12 @@ export const ListSensorsResponseItem = zod.object({
   umbral_humedad_max: zod.number(),
   umbral_ec_max: zod.number(),
   created_at: zod.coerce.date(),
+  ubicacion: zod
+    .object({
+      lat: zod.number(),
+      lon: zod.number(),
+    })
+    .nullish(),
 });
 export const ListSensorsResponse = zod.array(ListSensorsResponseItem);
 
@@ -41,6 +47,12 @@ export const GetSensorsSummaryResponseItem = zod.object({
     umbral_humedad_max: zod.number(),
     umbral_ec_max: zod.number(),
     created_at: zod.coerce.date(),
+    ubicacion: zod
+      .object({
+        lat: zod.number(),
+        lon: zod.number(),
+      })
+      .nullish(),
   }),
   latestReading: zod
     .object({
@@ -78,7 +90,29 @@ export const GetSensorResponse = zod.object({
   umbral_humedad_max: zod.number(),
   umbral_ec_max: zod.number(),
   created_at: zod.coerce.date(),
+  ubicacion: zod
+    .object({
+      lat: zod.number(),
+      lon: zod.number(),
+    })
+    .nullish(),
 });
+
+/**
+ * @summary Get 7-day weather forecast for the sensor location
+ */
+export const GetSensorWeatherParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+export const GetSensorWeatherResponseItem = zod.object({
+  date: zod.coerce.date(),
+  temp_max: zod.number(),
+  temp_min: zod.number(),
+  precipitation_sum: zod.number(),
+  weathercode: zod.number(),
+});
+export const GetSensorWeatherResponse = zod.array(GetSensorWeatherResponseItem);
 
 /**
  * @summary Get readings for a sensor in a given time range

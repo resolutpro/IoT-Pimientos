@@ -16,6 +16,8 @@ import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
+import { MapCard } from "@/components/map-card";
+import { WeatherForecastCard } from "@/components/weather-forecast-card";
 import type { DateRange } from "react-day-picker";
 
 export default function SensorDetail() {
@@ -216,7 +218,25 @@ export default function SensorDetail() {
           )}
         </CardContent>
       </Card>
-
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="lg:col-span-2">
+          <WeatherForecastCard sensorId={sensor.id_sensor} />
+        </div>
+        <div>
+          {sensor.ubicacion ? (
+            <MapCard lat={sensor.ubicacion.lat} lon={sensor.ubicacion.lon} />
+          ) : (
+            <Card className="h-full">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-base font-semibold">Ubicación</CardTitle>
+              </CardHeader>
+              <CardContent className="flex items-center justify-center h-48 sm:h-[250px] text-sm text-muted-foreground border border-dashed rounded-xl m-4 mt-0 bg-muted/20">
+                Ubicación no configurada
+              </CardContent>
+            </Card>
+          )}
+        </div>
+      </div>
     </div>
   );
 }

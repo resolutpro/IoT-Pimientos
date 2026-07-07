@@ -1,11 +1,11 @@
-import { Router, type IRouter } from "express";
+import { Router, type IRouter, type Request, type Response } from "express";
 import { db } from "@workspace/db";
-import { readingsTable } from "@workspace/db";
+import { readingsTable, sensorsTable } from "@workspace/db";
 import { eq, desc, gte, lte, and } from "drizzle-orm";
 import type { Sensor, Reading } from "@workspace/db";
 import { getSensorsConfig } from "../lib/sensors";
 import { getWateringRecommendation } from "../lib/wateringLogic";
-import { getRainForecast } from "../lib/weather";
+import { getRainForecast, get7DayForecast } from "../lib/weather";
 
 const router: IRouter = Router();
 
@@ -93,25 +93,70 @@ router.get("/sensors/summary", async (_req, res) => {
   res.json(summaries);
 });
 
-router.get("/sensors/:id", async (req, res) => {
-  const sensors = await getSensorsConfig();
-  const sensor = sensors.find((s) => s.id_sensor === req.params.id);
+router.get("/sensors", async (req: Request, res: Response) => {
+  const sensors = await db.select().from(sensorsTable);
+  const configList = await getSensorsConfig();
 
-  if (!sensor) {
+  const mappedSensors = sensors.map(s => {
+    const config = configList.find(c => c.id_sensor === s.id_sensor);
+    return {
+      ...s,
+      ubicacion: config?.ubicacion ?? null
+    };
+  });
+
+  res.json(mappedSensors);
+});
+
+router.get("/sensors/:id", async (req: Request, res: Response) => {
+  const id = req.params.id as string;
+  const sensor = await db
+    .select()
+    .from(sensorsTable)
+    .where(eq(sensorsTable.id_sensor, id))
+    .limit(1);
+
+  if (sensor.length === 0) {
     res.status(404).json({ error: "Sensor not found" });
     return;
   }
 
-  res.json(sensor);
+  const configList = await getSensorsConfig();
+  const config = configList.find(c => c.id_sensor === id);
+
+  res.json({
+    ...sensor[0],
+    ubicacion: config?.ubicacion ?? null
+  });
 });
 
-router.get("/sensors/:id/readings", async (req, res) => {
+router.get("/sensors/:id/weather", async (req: Request, res: Response) => {
+  const id = req.params.id as string;
+  const configList = await getSensorsConfig();
+  const config = configList.find(c => c.id_sensor === id);
+
+  if (!config || !config.ubicacion) {
+    res.status(404).json({ error: "Sensor not found or has no location configured" });
+    return;
+  }
+
+  const forecast = await get7DayForecast(config.ubicacion.lat, config.ubicacion.lon);
+  if (!forecast) {
+    res.status(500).json({ error: "Failed to fetch weather forecast" });
+    return;
+  }
+
+  res.json(forecast);
+});
+
+router.get("/sensors/:id/readings", async (req: Request, res: Response) => {
+  const id = req.params.id as string;
   const fromQuery = req.query["from"] as string | undefined;
   const toQuery = req.query["to"] as string | undefined;
   const rangeQuery = req.query["range"] as string | undefined;
 
   const sensors = await getSensorsConfig();
-  const sensor = sensors.find((s) => s.id_sensor === req.params.id);
+  const sensor = sensors.find((s) => s.id_sensor === id);
 
   if (!sensor) {
     res.status(404).json({ error: "Sensor not found" });
@@ -138,7 +183,7 @@ router.get("/sensors/:id/readings", async (req, res) => {
     .from(readingsTable)
     .where(
       and(
-        eq(readingsTable.sensor_id, req.params.id),
+        eq(readingsTable.sensor_id, id),
         gte(readingsTable.timestamp, fromDate),
         lte(readingsTable.timestamp, toDate)
       )

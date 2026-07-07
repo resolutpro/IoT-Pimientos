@@ -9,6 +9,11 @@ export interface HealthStatus {
   status: string;
 }
 
+export type SensorUbicacion = {
+  lat: number;
+  lon: number;
+} | null;
+
 export interface Sensor {
   id_sensor: string;
   nombre_zona: string;
@@ -17,6 +22,15 @@ export interface Sensor {
   umbral_humedad_max: number;
   umbral_ec_max: number;
   created_at: string;
+  ubicacion?: SensorUbicacion;
+}
+
+export interface DailyForecast {
+  date: string;
+  temp_max: number;
+  temp_min: number;
+  precipitation_sum: number;
+  weathercode: number;
 }
 
 export interface SensorInput {

@@ -14,6 +14,7 @@ import type {
 } from "@tanstack/react-query";
 
 import type {
+  DailyForecast,
   ErrorResponse,
   GetSensorReadingsParams,
   HealthStatus,
@@ -332,6 +333,93 @@ export function useGetSensor<
   },
 ): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
   const queryOptions = getGetSensorQueryOptions(id, options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+/**
+ * @summary Get 7-day weather forecast for the sensor location
+ */
+export const getGetSensorWeatherUrl = (id: string) => {
+  return `/api/sensors/${id}/weather`;
+};
+
+export const getSensorWeather = async (
+  id: string,
+  options?: RequestInit,
+): Promise<DailyForecast[]> => {
+  return customFetch<DailyForecast[]>(getGetSensorWeatherUrl(id), {
+    ...options,
+    method: "GET",
+  });
+};
+
+export const getGetSensorWeatherQueryKey = (id: string) => {
+  return [`/api/sensors/${id}/weather`] as const;
+};
+
+export const getGetSensorWeatherQueryOptions = <
+  TData = Awaited<ReturnType<typeof getSensorWeather>>,
+  TError = ErrorType<void>,
+>(
+  id: string,
+  options?: {
+    query?: UseQueryOptions<
+      Awaited<ReturnType<typeof getSensorWeather>>,
+      TError,
+      TData
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getGetSensorWeatherQueryKey(id);
+
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof getSensorWeather>>
+  > = ({ signal }) => getSensorWeather(id, { signal, ...requestOptions });
+
+  return {
+    queryKey,
+    queryFn,
+    enabled: !!id,
+    ...queryOptions,
+  } as UseQueryOptions<
+    Awaited<ReturnType<typeof getSensorWeather>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type GetSensorWeatherQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getSensorWeather>>
+>;
+export type GetSensorWeatherQueryError = ErrorType<void>;
+
+/**
+ * @summary Get 7-day weather forecast for the sensor location
+ */
+
+export function useGetSensorWeather<
+  TData = Awaited<ReturnType<typeof getSensorWeather>>,
+  TError = ErrorType<void>,
+>(
+  id: string,
+  options?: {
+    query?: UseQueryOptions<
+      Awaited<ReturnType<typeof getSensorWeather>>,
+      TError,
+      TData
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getGetSensorWeatherQueryOptions(id, options);
 
   const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
     queryKey: QueryKey;
