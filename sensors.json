@@ -3,12 +3,11 @@
     "id_sensor": "sensor-1",
     "nombre_zona": "Sensor de Riego",
     "tipo": "riego",
-    "umbral_humedad_min": 7.2,
+    "umbral_humedad_min": 7.8,
     "umbral_humedad_max": 10.5,
     "umbral_regar": 7.8,
     "umbral_objetivo_min": 9.0,
     "umbral_objetivo_max": 9.5,
-    "umbral_ec_max": 3.0,
     "mqtt_topic": "finca/sensor-1/datos",
     "thingspeak_channel_id": "3419938",
     "ubicacion": {
