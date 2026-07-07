@@ -12,6 +12,12 @@ export type ConfigSensor = Sensor & {
   mqtt_topic?: string;
   thingspeak_channel_id?: string;
   mapeo_variables?: Record<string, string>;
+  umbral_humedad_min: number;
+  umbral_humedad_max: number;
+  umbral_ec_max: number;
+  umbral_regar?: number;
+  umbral_objetivo_min?: number;
+  umbral_objetivo_max?: number;
   ubicacion?: {
     lat: number;
     lon: number;

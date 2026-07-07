@@ -32,6 +32,10 @@ export async function getWateringRecommendation(
       return null;
     }
 
+    const umbralRegar = sensorConfig.umbral_regar ?? 7.8;
+    const umbralObjMin = sensorConfig.umbral_objetivo_min ?? 9.0;
+    const umbralObjMax = sensorConfig.umbral_objetivo_max ?? 9.5;
+
     // Rule 2: Evaluate watering event
     // We look for a "watering event" (jump > 1.0) in the past readings, 
     // starting from index 3 or 4 (which means 1.5 to 2 hours ago).
@@ -42,25 +46,24 @@ export async function getWateringRecommendation(
       if (readingA.humedad !== null && readingB.humedad !== null) {
         if (readingA.humedad - readingB.humedad > 1.0) {
           // Watering event detected
-          if (currentHumedad >= 9.0 && currentHumedad <= 9.5) {
-            return "Riego correcto (9.0 - 9.5)";
+          if (currentHumedad >= umbralObjMin && currentHumedad <= umbralObjMax) {
+            return `Riego correcto (${umbralObjMin} - ${umbralObjMax})`;
           } else if (currentHumedad < 8.7) {
-            return "El riego se ha quedado corto (< 8.7)";
+            return `El riego se ha quedado corto (< 8.7)`;
           } else if (currentHumedad > 10.5) {
-            return "Riego excesivo (> 10.5)";
+            return `Riego excesivo (> 10.5)`;
           }
         }
       }
     }
 
     // Rule 1: Should we water?
-    // Check if the last 3 consecutive readings are <= 7.8
+    // Check if the last 3 consecutive readings are <= umbralRegar
     if (recentReadings.length >= 3) {
-      const allLow = recentReadings.slice(0, 3).every((r) => {
-        return r.humedad !== null && r.humedad !== undefined && r.humedad <= 7.8;
-      });
+      const lastThreeReadings = recentReadings.slice(0, 3);
+      const lowMoistureCount = lastThreeReadings.filter(r => r.humedad !== null && r.humedad <= umbralRegar).length;
 
-      if (allLow) {
+      if (lowMoistureCount === 3) {
         // Check weather
         let willRain = false;
         if (sensorConfig.ubicacion) {
@@ -71,16 +74,16 @@ export async function getWateringRecommendation(
         }
 
         if (willRain) {
-          return "Sugerencia: NO regar (Humedad <= 7.8 pero se prevén lluvias)";
+          return `Sugerencia: NO regar (Humedad <= ${umbralRegar} pero hay lluvia prevista)`;
         } else {
-          return "Sugerencia: Regar (Humedad <= 7.8 en las últimas 3 lecturas)";
+          return `Sugerencia: Regar (Humedad <= ${umbralRegar} en las últimas 3 lecturas)`;
         }
       }
     }
 
     // Default status if inside normal operational range
-    if (currentHumedad >= 8.5 && currentHumedad <= 9.5) {
-      return "Zona buena (8.5 - 9.5)";
+    if (currentHumedad >= umbralObjMin && currentHumedad <= umbralObjMax) {
+      return `Zona buena (${umbralObjMin} - ${umbralObjMax})`;
     }
 
     return null;

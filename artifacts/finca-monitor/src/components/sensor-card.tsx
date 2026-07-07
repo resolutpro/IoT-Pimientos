@@ -74,16 +74,16 @@ export function SensorCard({ summary }: SensorCardProps) {
               <Badge 
                 variant="outline" 
                 className={cn(
-                  "text-[10px] py-0 px-1.5 flex items-center gap-1 font-medium tracking-tight", 
+                  "text-xs py-0.5 px-2 flex items-center gap-1 font-medium tracking-tight mt-0.5", 
                   summary.rain_forecast 
                     ? "text-sky-700 bg-sky-50/80 border-sky-200" 
                     : "text-amber-700 bg-amber-50/80 border-amber-200"
                 )}
               >
                 {summary.rain_forecast ? (
-                  <><CloudRain className="w-2.5 h-2.5" /> Lluvia prevista</>
+                  <><CloudRain className="w-3 h-3" /> Lluvia (próximas 48h)</>
                 ) : (
-                  <><Sun className="w-2.5 h-2.5" /> Sin lluvia</>
+                  <><Sun className="w-3 h-3" /> Sin lluvia (próximas 48h)</>
                 )}
               </Badge>
             )}
