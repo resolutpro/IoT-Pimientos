@@ -61,6 +61,7 @@ export interface SensorSummary {
   status: SensorSummaryStatus;
   alerts: string[];
   recommendation?: string | null;
+  rain_forecast?: boolean | null;
 }
 
 export interface ErrorResponse {

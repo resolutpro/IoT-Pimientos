@@ -1,7 +1,7 @@
 import { SensorSummary } from "@workspace/api-client-react";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Droplets, Thermometer, Activity, Battery, Wifi, AlertTriangle, CheckCircle2, HelpCircle } from "lucide-react";
+import { Droplets, Thermometer, Activity, Battery, Wifi, AlertTriangle, CheckCircle2, HelpCircle, CloudRain, Sun } from "lucide-react";
 import { Link } from "wouter";
 import { formatDistanceToNow, parseISO } from "date-fns";
 import { cn } from "@/lib/utils";
@@ -61,13 +61,33 @@ export function SensorCard({ summary }: SensorCardProps) {
             </h3>
             <p className="text-xs text-muted-foreground font-mono mt-0.5 truncate">{sensor.id_sensor}</p>
           </div>
-          <Badge
-            variant="outline"
-            className={cn("shrink-0 capitalize text-xs font-semibold flex items-center gap-1 py-1 px-2", STATUS_COLORS[status])}
-          >
-            <StatusIcon className="w-3 h-3" />
-            {STATUS_LABEL[status]}
-          </Badge>
+          <div className="flex flex-col gap-1.5 items-end shrink-0">
+            <Badge
+              variant="outline"
+              className={cn("capitalize text-xs font-semibold flex items-center gap-1 py-1 px-2", STATUS_COLORS[status])}
+            >
+              <StatusIcon className="w-3 h-3" />
+              {STATUS_LABEL[status]}
+            </Badge>
+            
+            {summary.rain_forecast !== null && summary.rain_forecast !== undefined && (
+              <Badge 
+                variant="outline" 
+                className={cn(
+                  "text-[10px] py-0 px-1.5 flex items-center gap-1 font-medium tracking-tight", 
+                  summary.rain_forecast 
+                    ? "text-sky-700 bg-sky-50/80 border-sky-200" 
+                    : "text-amber-700 bg-amber-50/80 border-amber-200"
+                )}
+              >
+                {summary.rain_forecast ? (
+                  <><CloudRain className="w-2.5 h-2.5" /> Lluvia prevista</>
+                ) : (
+                  <><Sun className="w-2.5 h-2.5" /> Sin lluvia</>
+                )}
+              </Badge>
+            )}
+          </div>
         </CardHeader>
 
         <CardContent className="p-4 pt-2">

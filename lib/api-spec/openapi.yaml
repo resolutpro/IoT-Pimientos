@@ -248,6 +248,9 @@ components:
         recommendation:
           type: string
           nullable: true
+        rain_forecast:
+          type: boolean
+          nullable: true
       required:
         - sensor
         - status

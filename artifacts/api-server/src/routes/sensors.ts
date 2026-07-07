@@ -5,6 +5,7 @@ import { eq, desc, gte, lte, and } from "drizzle-orm";
 import type { Sensor, Reading } from "@workspace/db";
 import { getSensorsConfig } from "../lib/sensors";
 import { getWateringRecommendation } from "../lib/wateringLogic";
+import { getRainForecast } from "../lib/weather";
 
 const router: IRouter = Router();
 
@@ -68,6 +69,12 @@ router.get("/sensors/summary", async (_req, res) => {
       const { status, alerts } = computeStatus(latestReading ?? null, sensor);
       
       let recommendation = null;
+      let rain_forecast = null;
+
+      if (sensor.ubicacion) {
+        rain_forecast = await getRainForecast(sensor.ubicacion.lat, sensor.ubicacion.lon);
+      }
+
       if (sensor.tipo === "riego") {
         recommendation = await getWateringRecommendation(sensor.id_sensor, sensor as any);
       }
@@ -78,6 +85,7 @@ router.get("/sensors/summary", async (_req, res) => {
         status,
         alerts,
         recommendation,
+        rain_forecast,
       };
     })
   );
