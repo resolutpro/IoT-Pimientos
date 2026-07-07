@@ -111,7 +111,7 @@ export function SensorCard({ summary }: SensorCardProps) {
                   {/* Gauge Bar */}
                   <div className="relative h-6 w-full bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden border border-slate-200 dark:border-slate-700">
                     {/* Optimal Range Highlight */}
-                    <div className="absolute top-0 bottom-0 bg-emerald-100 dark:bg-emerald-900/30" style={{ left: `${sensor.umbral_humedad_min}%`, right: `${100 - sensor.umbral_humedad_max}%` }} />
+                    <div className="absolute top-0 bottom-0 bg-emerald-100 dark:bg-emerald-900/30" style={{ left: `${(sensor.umbral_humedad_min / 20) * 100}%`, right: `${100 - (sensor.umbral_humedad_max / 20) * 100}%` }} />
                     
                     {/* Fill */}
                     <div 
@@ -120,7 +120,7 @@ export function SensorCard({ summary }: SensorCardProps) {
                         latestReading.humedad! < sensor.umbral_humedad_min ? "bg-red-500" : 
                         latestReading.humedad! > sensor.umbral_humedad_max ? "bg-orange-500" : "bg-emerald-500"
                       )} 
-                      style={{ width: `${Math.min(100, Math.max(0, latestReading.humedad ?? 0))}%` }} 
+                      style={{ width: `${Math.min(100, Math.max(0, ((latestReading.humedad ?? 0) / 20) * 100))}%` }} 
                     />
 
                     {/* Value Thumb Indicator (Pelota) */}
@@ -130,13 +130,13 @@ export function SensorCard({ summary }: SensorCardProps) {
                         latestReading.humedad! < sensor.umbral_humedad_min ? "bg-red-500" : 
                         latestReading.humedad! > sensor.umbral_humedad_max ? "bg-orange-500" : "bg-emerald-500"
                       )}
-                      style={{ left: `calc(${Math.min(100, Math.max(0, latestReading.humedad ?? 0))}% - 8px)` }}
+                      style={{ left: `calc(${Math.min(100, Math.max(0, ((latestReading.humedad ?? 0) / 20) * 100))}% - 8px)` }}
                     />
                     
                     {/* Min Marker */}
-                    <div className="absolute top-0 bottom-0 w-0.5 bg-slate-400 dark:bg-slate-500 z-10" style={{ left: `${sensor.umbral_humedad_min}%` }} />
+                    <div className="absolute top-0 bottom-0 w-0.5 bg-slate-400 dark:bg-slate-500 z-10" style={{ left: `${(sensor.umbral_humedad_min / 20) * 100}%` }} />
                     {/* Max Marker */}
-                    <div className="absolute top-0 bottom-0 w-0.5 bg-slate-400 dark:bg-slate-500 z-10" style={{ left: `${sensor.umbral_humedad_max}%` }} />
+                    <div className="absolute top-0 bottom-0 w-0.5 bg-slate-400 dark:bg-slate-500 z-10" style={{ left: `${(sensor.umbral_humedad_max / 20) * 100}%` }} />
                   </div>
                   
                   <div className="flex justify-between text-[10px] text-muted-foreground font-medium px-1">
@@ -145,7 +145,7 @@ export function SensorCard({ summary }: SensorCardProps) {
                       <span>Mín: {sensor.umbral_humedad_min}%</span>
                       <span>Máx: {sensor.umbral_humedad_max}%</span>
                     </div>
-                    <span>100%</span>
+                    <span>20%</span>
                   </div>
 
                   {latestReading.humedad! < sensor.umbral_humedad_min && (
